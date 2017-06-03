@@ -4,4 +4,9 @@ class Reservation < ApplicationRecord
   has_many :partygoers, dependent: :destroy
   has_many :participants, through: :partygoers
   has_many :comments, dependent: :destroy
+
+  validates :capacity, presence: true, numericality: true
+  validates :date, presence: true
+  validates :reservation_owner_id, presence: true, numericality: true
+  validates :table_id, presence: true, numericality: true
 end

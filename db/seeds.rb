@@ -27,7 +27,10 @@ user2 = User.new({
 user2.save!
 
 club = Club.new({
-  name: "Club 33"
+  name: "Club 33",
+  capacity: 260,
+  location: "Studenski Grad",
+  description: "Awesome club in the heart of party town."
   })
 
 club.club_owner = user1
