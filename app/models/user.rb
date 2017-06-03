@@ -10,4 +10,7 @@ class User < ApplicationRecord
   has_many :reservations_as_participant, through: :partygoers, source: :reservation
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
+
+  validates :email, presence: true, format: { with: Devise::email_regexp }
+  validates :full_name, presence: true
 end
