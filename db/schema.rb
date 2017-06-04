@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170603115924) do
+ActiveRecord::Schema.define(version: 20170604112412) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -57,15 +57,22 @@ ActiveRecord::Schema.define(version: 20170603115924) do
     t.index ["user_id"], name: "index_ratings_on_user_id", using: :btree
   end
 
+  create_table "res_tables", force: :cascade do |t|
+    t.integer  "reservation_id"
+    t.integer  "table_id"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+    t.index ["reservation_id"], name: "index_res_tables_on_reservation_id", using: :btree
+    t.index ["table_id"], name: "index_res_tables_on_table_id", using: :btree
+  end
+
   create_table "reservations", force: :cascade do |t|
     t.integer  "capacity"
     t.date     "date"
     t.integer  "reservation_owner_id"
-    t.integer  "table_id"
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
     t.index ["reservation_owner_id"], name: "index_reservations_on_reservation_owner_id", using: :btree
-    t.index ["table_id"], name: "index_reservations_on_table_id", using: :btree
   end
 
   create_table "tables", force: :cascade do |t|
@@ -101,7 +108,8 @@ ActiveRecord::Schema.define(version: 20170603115924) do
   add_foreign_key "partygoers", "users", column: "partygoer_id"
   add_foreign_key "ratings", "clubs"
   add_foreign_key "ratings", "users"
-  add_foreign_key "reservations", "tables"
+  add_foreign_key "res_tables", "reservations"
+  add_foreign_key "res_tables", "tables"
   add_foreign_key "reservations", "users", column: "reservation_owner_id"
   add_foreign_key "tables", "clubs"
 end

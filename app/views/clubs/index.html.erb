@@ -1,0 +1,21 @@
+<% @clubs.each do |club| %>
+  <br>
+  Name: <%= club.name %>
+  <br>
+  Capacity: <%= club.capacity %>
+  <br>
+  Description: <%= club.description %>
+  <br>
+  Location: <%= club.location %>
+  <br>
+  Owner: <%= club.club_owner.full_name %>
+  <br>
+  Rating: <%= club.average_rating %>/5 with <%= club.votes %> votes.
+  <br>
+  Free seats: <%= club.seats_available %>
+  <br>
+  <%= link_to "Make a reservation", club_path(club)   %>
+<% end %>
+
+<br>
+<%= link_to "Back", :back  %>

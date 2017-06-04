@@ -15,9 +15,9 @@ Rails.application.routes.draw do
       get 'invite-friends'
       get 'show-comments'
       get 'cancel'
+      get 'join'
+      get 'leave'
     end
-    get 'join', to: "partygoers#create"
-    get 'leave', to: "partygoers#destroy"
     get 'rate', to: "ratings#create"
     resources :comments, except: [:index, :show, :new]
   end

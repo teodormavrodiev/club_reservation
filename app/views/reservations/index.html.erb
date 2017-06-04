@@ -1,0 +1,45 @@
+Owner of:
+<br>
+<% @owner_of.each do |res| %>
+  Reservation in: <%= res.tables.first.club.name %>
+  Capacity: <%= res.capacity %>
+  <br>
+  Date: <%= res.date %>
+  <br>
+  Tables:
+  <% res.tables.each do |tab| %>
+    <%= tab.id %>,
+  <% end %>
+  <br>
+  Participants:
+  <% res.participants.each do |par| %>
+    <%= par.full_name %>
+    <br>
+  <% end %>
+  <br>
+  <br>
+<% end %>
+<br>
+Participant in:
+<br>
+<% @participant_in.each do |res| %>
+  Reservation in: <%= res.tables.first.club.name %>
+  Capacity: <%= res.capacity %>
+  <br>
+  Date: <%= res.date %>
+  <br>
+  Tables:
+  <% res.tables.each do |tab| %>
+    <%= tab.id %>,
+  <% end %>
+  <br>
+  Reservation owner: <%= res.reservation_owner.full_name %>
+  <br>
+  Participants:
+  <% res.participants.each do |par| %>
+    <%= par.full_name %>
+    <br>
+  <% end %>
+  <br>
+  <br>
+<% end %>

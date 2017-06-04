@@ -12,5 +12,5 @@ class User < ApplicationRecord
   has_many :ratings, dependent: :destroy
 
   validates :email, presence: true, format: { with: Devise::email_regexp }
-  validates :full_name, presence: true
+  # validates :full_name, presence: true
 end

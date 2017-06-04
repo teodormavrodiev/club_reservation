@@ -1,0 +1,22 @@
+<%= @club.name %>
+<br>
+<form action ="<%= reserve_club_path %>">
+<% @club.tables.each_with_index do |table, i| %>
+  <br>
+  Table <%= i %>
+  Capacity: <%= table.capacity %>
+  Free:
+  <% if table.reserved? %>
+    No.
+  <% else %>
+    Yes.
+  <% end %>
+<%= check_box_tag("table#{table.id}") %>
+<%= label_tag("table#{table.id}", "Select") %>
+<% end %>
+<br>
+<br>
+<%= submit_tag "Reserve Tables" %>
+</form>
+<br>
+<%= link_to "Back", :back  %>

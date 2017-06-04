@@ -9,4 +9,27 @@ class Club < ApplicationRecord
   validates :description, presence: true
   validates :location, presence: true
   validates :club_owner_id, presence: true, numericality: true
+
+  def average_rating
+    average_rating = 0
+    self.ratings.each do |rating|
+      average_rating += rating.score
+    end
+    average_rating/self.ratings.length
+  end
+
+  def votes
+    self.ratings.length
+  end
+
+  def seats_available
+    seats_left = self.capacity
+    self.tables.each do |table|
+      if table.reserved?
+        seats_left -= table.capacity
+      end
+    end
+    seats_left
+  end
+
 end
