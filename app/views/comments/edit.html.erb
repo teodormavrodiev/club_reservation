@@ -1,0 +1,19 @@
+  <br>
+    <%= User.find(@comment.user_id).full_name %> at datetime: <%= @comment.datetime %>
+  <br>
+    <%= @comment.information %>
+
+  <br>
+  <br>
+  <br>
+  Edit Comment:
+  <br>
+  <br>
+
+  <%= form_for(@comment, url: comment_path, method: :put) do |f| %>
+    <%= text_field_tag "Your Comment" %>
+  <%= submit_tag "Edit a comment" %>
+  <% end %>
+
+  <br>
+  <br>

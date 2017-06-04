@@ -1,2 +1,0 @@
-class PartygoersController < ApplicationController
-end

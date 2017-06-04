@@ -19,7 +19,8 @@ Rails.application.routes.draw do
       get 'leave'
     end
     get 'rate', to: "ratings#create"
-    resources :comments, except: [:index, :show, :new]
   end
+
+  resources :comments, except: [:index, :show, :new]
 
 end
