@@ -26,8 +26,8 @@ Owner of:
     <%= User.find(com.user_id).full_name %> at datetime: <%= com.datetime %>
     <%= com.information %>
   <br>
-  <%= link_to "edit", edit_comment_path(com)  %>
-  <%= link_to "delete", comment_path(com), method: :delete  %>
+  <%= link_to "edit", edit_reservation_comment_path(res, com)  %>
+  <%= link_to "delete", reservation_comment_path(res, com), method: :delete  %>
 
   <% end %>
   <br>
@@ -36,11 +36,14 @@ Owner of:
   Add Comment:
   <br>
   <br>
-  <form action="<%= comments_path(res) %>" method="POST">
+  <form action="<%= reservation_comments_path(res) %>" method="POST">
     <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
     <%= text_field_tag "Your Comment" %>
   <%= submit_tag "Leave a comment" %>
   </form>
+  <br>
+  <br>
+  <%= link_to "cancel reservation", cancel_reservation_path(res)  %>
   <br>
   <br>
 <% end %>
@@ -75,8 +78,8 @@ Participant in:
     <%= User.find(com.user_id).full_name %> at datetime: <%= com.datetime %>
     <%= com.information %>
   <br>
-  <%= link_to "edit", edit_comment_path(com)  %>
-  <%= link_to "delete", comment_path(com), method: :delete  %>
+  <%= link_to "edit", edit_reservation_comment_path(res, com)  %>
+  <%= link_to "delete", reservation_comment_path(res, com), method: :delete  %>
 
   <% end %>
   <br>
@@ -85,13 +88,14 @@ Participant in:
   Add Comment:
   <br>
   <br>
-  <form action="<%= comments_path(res) %>" method="POST">
+  <form action="<%= reservation_comments_path(res) %>" method="POST">
     <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
     <%= text_field_tag "Your Comment" %>
   <%= submit_tag "Leave a comment" %>
   </form>
   <br>
   <br>
+  <%= link_to "leave reservation", leave_reservation_path(res)  %>
   <br>
   <br>
 <% end %>

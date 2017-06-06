@@ -29,7 +29,13 @@ class ReservationsController < ApplicationController
       })
     res.tables = res_tables
     res.reservation_owner = current_user
-    res.save!
+    save_res = "yes"
+    res.tables.each do |table|
+      if table.reserved_on?(res_date)
+        save_res = "no"
+      end
+    end
+    res.save! if save_res == "yes"
     redirect_to reservations_path
   end
 
@@ -42,15 +48,15 @@ class ReservationsController < ApplicationController
   end
 
   def leave
-
-  end
-
-  def show_comments
-
+    reservation = Reservation.find(params[:id])
+    reservation.participants.destroy(current_user)
+    redirect_to :back
   end
 
   def cancel
-
+    reservation = Reservation.find(params[:id])
+    reservation.destroy
+    redirect_to :back
   end
 
 end

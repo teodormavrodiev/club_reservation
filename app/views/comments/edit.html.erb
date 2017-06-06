@@ -10,7 +10,7 @@
   <br>
   <br>
 
-  <%= form_for(@comment, url: comment_path, method: :put) do |f| %>
+  <%= form_for(@comment, url: reservation_comment_path, method: :put) do |f| %>
     <%= text_field_tag "Your Comment" %>
   <%= submit_tag "Edit a comment" %>
   <% end %>

@@ -6,7 +6,7 @@
   Table <%= i %>
   Capacity: <%= table.capacity %>
   Free:
-  <% if table.reserved? %>
+  <% if table.reserved_on?(@date) %>
     No.
   <% else %>
     Yes.

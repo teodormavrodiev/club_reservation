@@ -12,20 +12,25 @@ class Club < ApplicationRecord
 
   def average_rating
     average_rating = 0
-    self.ratings.each do |rating|
-      average_rating += rating.score
+    if votes > 0
+      ratings.each do |rating|
+        average_rating += rating.score
+      end
+      average_rating = average_rating/votes
+    else
+      average_rating = "Not enough votes"
     end
-    average_rating/self.ratings.length
+    average_rating
   end
 
   def votes
-    self.ratings.length
+    ratings.length
   end
 
-  def seats_available
-    seats_left = self.capacity
-    self.tables.each do |table|
-      if table.reserved?
+  def seats_available_on(date)
+    seats_left = capacity
+    tables.each do |table|
+      if table.reserved_on?(date)
         seats_left -= table.capacity
       end
     end
