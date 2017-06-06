@@ -1,0 +1,101 @@
+Owner of:
+<br>
+<% @owner_of.each do |res| %>
+  Reservation in: <%= res.tables.first.club.name %>
+  Capacity: <%= res.capacity %>
+  <br>
+  Date: <%= res.date %>
+  <br>
+  Tables:
+  <% res.tables.each do |tab| %>
+    <%= tab.id %>,
+  <% end %>
+  <br>
+  Participants:
+  <% res.participants.each do |par| %>
+    <%= par.full_name %>
+    <br>
+  <% end %>
+  <br>
+  <br>
+  Comments:
+  <br>
+  <% res.comments.each do |com| %>
+  <br>
+  <br>
+    <%= User.find(com.user_id).full_name %> at datetime: <%= com.datetime %>
+    <%= com.information %>
+  <br>
+  <%= link_to "edit", edit_reservation_comment_path(res, com)  %>
+  <%= link_to "delete", reservation_comment_path(res, com), method: :delete  %>
+
+  <% end %>
+  <br>
+  <br>
+  <br>
+  Add Comment:
+  <br>
+  <br>
+  <form action="<%= reservation_comments_path(res) %>" method="POST">
+    <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
+    <%= text_field_tag "Your Comment" %>
+  <%= submit_tag "Leave a comment" %>
+  </form>
+  <br>
+  <br>
+  <%= link_to "cancel reservation", cancel_reservation_path(res)  %>
+  <br>
+  <br>
+<% end %>
+<br>
+Participant in:
+<br>
+<% @participant_in.each do |res| %>
+  Reservation in: <%= res.tables.first.club.name %>
+  Capacity: <%= res.capacity %>
+  <br>
+  Date: <%= res.date %>
+  <br>
+  Tables:
+  <% res.tables.each do |tab| %>
+    <%= tab.id %>,
+  <% end %>
+  <br>
+  Reservation owner: <%= res.reservation_owner.full_name %>
+  <br>
+  Participants:
+  <% res.participants.each do |par| %>
+    <%= par.full_name %>
+    <br>
+  <% end %>
+    <br>
+  <br>
+  Comments:
+  <br>
+  <% res.comments.each do |com| %>
+  <br>
+  <br>
+    <%= User.find(com.user_id).full_name %> at datetime: <%= com.datetime %>
+    <%= com.information %>
+  <br>
+  <%= link_to "edit", edit_reservation_comment_path(res, com)  %>
+  <%= link_to "delete", reservation_comment_path(res, com), method: :delete  %>
+
+  <% end %>
+  <br>
+  <br>
+  <br>
+  Add Comment:
+  <br>
+  <br>
+  <form action="<%= reservation_comments_path(res) %>" method="POST">
+    <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
+    <%= text_field_tag "Your Comment" %>
+  <%= submit_tag "Leave a comment" %>
+  </form>
+  <br>
+  <br>
+  <%= link_to "leave reservation", leave_reservation_path(res)  %>
+  <br>
+  <br>
+<% end %>

@@ -1,11 +1,8 @@
 require 'faker'
 
 User.destroy_all
-Reservation.destroy_all
-Partygoer.destroy_all
 Club.destroy_all
-Comment.destroy_all
-Rating.destroy_all
+
 
 
 user1 = User.new({
@@ -63,18 +60,11 @@ club.save!
     })
   reservation.reservation_owner = user1 if i == 0
   reservation.reservation_owner = user2 if i == 1
-  reservation.table = Table.first if i == 0
-  reservation.table = Table.second if i == 1
+  reservation.tables = [Table.first, Table.second] if i ==0
+  reservation.tables = [Table.third] if i == 1
+  reservation.participants = [User.second] if i == 0
+  reservation.participants = [User.first] if i == 1
   reservation.save!
-}
-
-2.times { |i|
-  partygoer = Partygoer.new
-  partygoer.participant = user1 if i == 0
-  partygoer.participant = user2 if i == 1
-  partygoer.reservation = Reservation.first if i == 1
-  partygoer.reservation = Reservation.second if i == 0
-  partygoer.save!
 }
 
 2.times { |i|
