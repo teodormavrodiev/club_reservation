@@ -1,7 +1,8 @@
 class ReservationsController < ApplicationController
+  skip_before_action :authenticate_user!, only: [:show]
 
   def index
-    @owner_of = current_user.reservations_as_owner
+    @owner_of = policy_scope(Reservation).where(reservation_owner: current_user)
     @participant_in = current_user.reservations_as_participant
   end
 
@@ -35,6 +36,9 @@ class ReservationsController < ApplicationController
         save_res = "no"
       end
     end
+
+    authorize res
+
     res.save! if save_res == "yes"
     redirect_to reservations_path
   end
@@ -49,14 +53,18 @@ class ReservationsController < ApplicationController
 
   def leave
     reservation = Reservation.find(params[:id])
+    authorize reservation
+
     reservation.participants.destroy(current_user)
-    redirect_to :back
+    redirect_to reservations_path
   end
 
   def cancel
     reservation = Reservation.find(params[:id])
+    authorize reservation
+
     reservation.destroy
-    redirect_to :back
+    redirect_to reservations_path
   end
 
 end
