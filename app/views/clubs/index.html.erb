@@ -19,6 +19,15 @@
   Free seats: <%= club.seats_available_on(@date) %>
   <br>
   <%= link_to "Make a reservation", club_path(club)   %>
+
+<br>
+<br>
+<% club.photos.each do |photo| %>
+  <%= cl_image_tag photo.path, width: 160, height: 140, crop: :fill %>
+<% end %>
+<br>
+<br>
+
 <% end %>
 
 <br>

@@ -12,6 +12,8 @@ class User < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
 
+  has_attachment :photo
+
   validates :email, presence: true, format: { with: Devise::email_regexp }
   validates :full_name, presence: true
 
@@ -31,6 +33,7 @@ class User < ApplicationRecord
       user.update(user_params.except("first_name", "last_name"))
     else
       user = User.new(user_params.except("first_name", "last_name"))
+      user.photo_url = auth.info.image
       user.password = Devise.friendly_token[0,20]  # Fake password for validation
       user.save
     end
