@@ -1,0 +1,7 @@
+<%= form_for(@rating, url: reservation_ratings_url(@reservation), method: :post) do |f| %>
+  <%= text_field_tag "Club Feedback" %>
+  <%= select_tag(:score, options_for_select([['1', 1], ['2', 2], ['3', 3], ['4', 4], ['5', 5]])) %>
+
+<%= submit_tag "Leave your rating" %>
+<% end %>
+

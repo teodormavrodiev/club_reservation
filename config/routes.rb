@@ -17,7 +17,7 @@ Rails.application.routes.draw do
       get 'join'
       get 'leave'
     end
-    get 'rate', to: "ratings#create"
+    resources :ratings, only: [:new, :create]
     resources :comments, except: [:index, :show, :new]
   end
 
