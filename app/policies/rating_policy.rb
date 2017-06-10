@@ -5,7 +5,11 @@ class RatingPolicy < ApplicationPolicy
     end
   end
 
+  def new?
+    user.ratings.where(club_id:record.club_id).empty?
+  end
+
   def create?
-    true
+    user.ratings.where(club_id:record.club_id).empty?
   end
 end
