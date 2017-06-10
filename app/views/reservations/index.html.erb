@@ -14,6 +14,9 @@ Owner of:
   Participants:
   <% res.participants.each do |par| %>
     <%= par.full_name %>
+    <% if par.photo? %>
+      <%= cl_image_tag par.photo.path, width: 50, height: 60, crop: :fill %>
+    <% end %>
     <br>
   <% end %>
   <br>
@@ -23,7 +26,10 @@ Owner of:
   <% res.comments.each do |com| %>
   <br>
   <br>
-    <%= User.find(com.user_id).full_name %> at datetime: <%= com.datetime %>
+    <% if com.user.photo? %>
+      <%= cl_image_tag com.user.photo.path, width: 10, height: 15, crop: :fill %>
+    <% end %>
+    <%= com.user.full_name %> at datetime: <%= com.datetime %>
     <%= com.information %>
   <br>
   <%= link_to "edit", edit_reservation_comment_path(res, com)  %>
@@ -68,6 +74,9 @@ Participant in:
   Participants:
   <% res.participants.each do |par| %>
     <%= par.full_name %>
+    <% if par.photo? %>
+      <%= cl_image_tag par.photo.path, width: 50, height: 60, crop: :fill %>
+    <% end %>
     <br>
   <% end %>
     <br>
@@ -77,7 +86,10 @@ Participant in:
   <% res.comments.each do |com| %>
   <br>
   <br>
-    <%= User.find(com.user_id).full_name %> at datetime: <%= com.datetime %>
+    <% if com.user.photo? %>
+      <%= cl_image_tag com.user.photo.path, width: 10, height: 15, crop: :fill %>
+    <% end %>
+    <%= com.user.full_name %> at datetime: <%= com.datetime %>
     <%= com.information %>
   <br>
   <%= link_to "edit", edit_reservation_comment_path(res, com)  %>

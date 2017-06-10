@@ -4,6 +4,8 @@ class Club < ApplicationRecord
   has_many :reservations, through: :tables
   has_many :ratings, dependent: :destroy
 
+  has_attachments :photos, maximum: 20
+
   validates :name, presence: true
   validates :capacity, numericality: true
   validates :description, presence: true

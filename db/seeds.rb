@@ -34,6 +34,12 @@ club.club_owner = user1
 
 club.save!
 
+club.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112699/6_fekr3p.jpg",
+"http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/5_dd6wg7.jpg",
+"http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112699/4_o7i2vh.jpg",
+"http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/3_dadnzo.jpg",
+"http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/2_xb10kz.jpg"]
+
 3.times { |i|
   table = Table.new({
     capacity: 15
