@@ -5,4 +5,8 @@ class ClubPolicy < ApplicationPolicy
     end
   end
 
+  def show_map?
+    true
+  end
+
 end

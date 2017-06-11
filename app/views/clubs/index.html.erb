@@ -18,8 +18,9 @@
   <br>
   Free seats: <%= club.seats_available_on(@date) %>
   <br>
-  <%= link_to "Make a reservation", club_path(club)   %>
-
+  <%= link_to "Make a reservation", club_path(club)  %>
+  <br>
+  <%= link_to "See on the map", show_map_club_path(club)  %>
 <br>
 <br>
 <% club.photos.each do |photo| %>
@@ -29,6 +30,8 @@
 <br>
 
 <% end %>
+
+<%= render partial: "map" %>
 
 <br>
 <%= link_to "Back", :back  %>

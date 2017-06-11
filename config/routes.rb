@@ -9,12 +9,13 @@ Rails.application.routes.draw do
   resources :clubs, only: [:index, :show] do
     member do
       get 'reserve', to: "reservations#create"
+      get 'show_map', to: "clubs#show_map"
     end
   end
 
   resources :reservations, only: [:index, :show] do
     member do
-      get 'invite-friends'
+      get 'invite_friends'
       get 'cancel'
       get 'join'
       get 'leave'

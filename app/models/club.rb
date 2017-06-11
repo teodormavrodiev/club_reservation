@@ -6,11 +6,15 @@ class Club < ApplicationRecord
 
   has_attachments :photos, maximum: 20
 
+  geocoded_by :location
+
   validates :name, presence: true
   validates :capacity, numericality: true
   validates :description, presence: true
   validates :location, presence: true
   validates :club_owner_id, presence: true, numericality: true
+
+  after_validation :geocode, if: :location_changed?
 
   def average_rating
     average_rating = 0
