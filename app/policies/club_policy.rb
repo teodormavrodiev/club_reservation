@@ -5,4 +5,8 @@ class ClubPolicy < ApplicationPolicy
     end
   end
 
+  def show_map?
+    scope.where(:id => record.id).exists?
+  end
+
 end
