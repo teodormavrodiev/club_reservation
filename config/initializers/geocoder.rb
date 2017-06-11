@@ -13,7 +13,7 @@ Geocoder.configure(
 
   :lookup    => :google,
   :api_key   => ENV['GOOGLE_API_SERVER_KEY'],
-  :use_https => true
+  :use_https => true,
   # Exceptions that should not be rescued by default
   # (if you want to implement custom error handling);
   # supports SocketError and Timeout::Error
