@@ -23,13 +23,11 @@ class ClubsController < ApplicationController
     @club = Club.find(params[:id])
     authorize @club
 
-    @clubs = policy_scope(Club)
-    @date = params[:date] || Date.today
-
     @hash = Gmaps4rails.build_markers(@club) do |club, marker|
       marker.lat club.latitude
       marker.lng club.longitude
       # marker.infowindow render_to_string(partial: "/clubs/map_box", locals: { club: club })
     end
   end
+
 end

@@ -1,3 +1,16 @@
-<%= render partial: "map" %>
+<%= @club.name %>
 <br>
-<%= link_to "Back", :back  %>
+Capacity: <%= @club.capacity %>
+<br>
+Description: <%= @club.description %>
+<br>
+Location: <%= @club.location %>
+<br>
+Owner: <%= @club.club_owner.full_name %>
+<br>
+<% if @club.average_rating.is_a?(Numeric) %>
+  Rating: <%= @club.average_rating %>/5 with <%= @club.votes %> votes.
+<% else %>
+  Rating: Not enough votes.
+<% end %>
+<%= render partial: "map" %>

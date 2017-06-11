@@ -30,9 +30,18 @@ club = Club.new({
   description: "Awesome club in the heart of party town."
   })
 
+club2 = Club.new({
+  name: "Mascara",
+  capacity: 300,
+  location: "rakovska 25, Sofia, Bulgaria",
+  description: "Awesome club in the heart of the city."
+  })
+
 club.club_owner = user1
+club2.club_owner = user2
 
 club.save!
+club2.save!
 
 club.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112699/6_fekr3p.jpg",
 "http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/5_dd6wg7.jpg",
@@ -40,11 +49,24 @@ club.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v1497
 "http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/3_dadnzo.jpg",
 "http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/2_xb10kz.jpg"]
 
-3.times { |i|
+
+club2.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112699/6_fekr3p.jpg",
+"http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112698/5_dd6wg7.jpg",
+"http://res.cloudinary.com/teodormavrodiev/image/upload/v1497112699/4_o7i2vh.jpg"]
+
+6.times { |i|
   table = Table.new({
     capacity: 15
     })
   table.club = club
+  table.save!
+}
+
+6.times { |i|
+  table = Table.new({
+    capacity: 15
+    })
+  table.club = club2
   table.save!
 }
 
