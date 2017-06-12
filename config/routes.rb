@@ -15,7 +15,7 @@ Rails.application.routes.draw do
 
   resources :reservations, only: [:index, :show] do
     member do
-      get 'invite_friends'
+      get 'invited_friends'
       get 'cancel'
       get 'join'
       get 'leave'

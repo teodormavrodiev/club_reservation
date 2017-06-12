@@ -1,3 +1,39 @@
+  <script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId            : '1488123057912346',
+      autoLogAppEvents : true,
+      xfbml            : true,
+      version          : 'v2.9'
+    });
+    FB.AppEvents.logPageView();
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
+</script>
+
+<% content_for(:after_js) do %>
+  <%= javascript_tag do %>
+    $(document).ready(function() {
+      $(".send-dialog").on("click", function(){
+        FB.ui({
+          app_id: '1488123057912346',
+          method: 'send',
+          link: '<%= invited_friends_reservation_path(1) %>',
+        });
+      });
+    });
+  <% end %>
+<% end %>
+
+
 Owner of:
 <br>
 <% @owner_of.each do |res| %>
@@ -52,6 +88,9 @@ Owner of:
   <%= link_to "cancel reservation", cancel_reservation_path(res)  %>
   <br>
   <%= link_to "rate club", new_reservation_rating_path(res)  %>
+  <br>
+  <br>
+  <button class="send-dialog"> Share on facebook </button>
   <br>
   <br>
 <% end %>
