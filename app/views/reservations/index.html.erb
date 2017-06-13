@@ -1,7 +1,7 @@
   <script>
   window.fbAsyncInit = function() {
     FB.init({
-      appId            : '1488123057912346',
+      appId            : '<%= ENV["FB_ID"] %>',
       autoLogAppEvents : true,
       xfbml            : true,
       version          : 'v2.9'
@@ -24,9 +24,8 @@
     $(document).ready(function() {
       $(".send-dialog").on("click", function(){
         FB.ui({
-          app_id: '1488123057912346',
           method: 'send',
-          link: '<%= invited_friends_reservation_url(1) %>',
+          link: $(this).attr("value"),
         });
       });
     });
@@ -90,7 +89,9 @@ Owner of:
   <%= link_to "rate club", new_reservation_rating_path(res)  %>
   <br>
   <br>
-  <button class="send-dialog"> Share on facebook </button>
+
+  <button class="send-dialog" value="<%= invited_friends_reservation_url(res)%>"> Share on facebook </button>
+
   <br>
   <br>
 <% end %>
@@ -151,6 +152,9 @@ Participant in:
   <%= link_to "leave reservation", leave_reservation_path(res)  %>
   <br>
   <%= link_to "rate club", new_reservation_rating_path(res)  %>
+  <br>
+  <br>
+  <button class="send-dialog" value="<%= invited_friends_reservation_url(res)%>"> Share on facebook </button>
   <br>
   <br>
 <% end %>
