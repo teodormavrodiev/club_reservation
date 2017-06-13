@@ -1,3 +1,4 @@
+
 Rails.application.routes.draw do
 
   mount Attachinary::Engine => "/attachinary"
@@ -13,7 +14,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :reservations, only: [:index, :show] do
+  resources :reservations, only: [:index] do
     member do
       get 'invited_friends'
       get 'cancel'

@@ -16,4 +16,8 @@ class ReservationPolicy < ApplicationPolicy
   def cancel?
     record.reservation_owner == user
   end
+
+  def invited_friends?
+    true
+  end
 end

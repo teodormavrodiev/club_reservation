@@ -1,13 +1,9 @@
 class ReservationsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:show]
+  skip_before_action :authenticate_user!, only: [:invited_friends]
 
   def index
     @owner_of = policy_scope(Reservation).where(reservation_owner: current_user)
     @participant_in = current_user.reservations_as_participant
-  end
-
-  def show
-
   end
 
   def create
@@ -43,7 +39,9 @@ class ReservationsController < ApplicationController
     redirect_to reservations_path
   end
 
-  def invite_friends
+  def invited_friends
+    reservation = Reservation.find(params[:id])
+    authorize reservation
 
   end
 
