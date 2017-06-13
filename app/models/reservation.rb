@@ -6,7 +6,10 @@ class Reservation < ApplicationRecord
   has_many :participants, through: :partygoers
   has_many :comments, dependent: :destroy
 
+  has_secure_token
+
   validates :capacity, presence: true, numericality: true
   validates :date, presence: true
   validates :reservation_owner_id, presence: true, numericality: true
+
 end
