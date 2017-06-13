@@ -23,10 +23,17 @@
   <%= javascript_tag do %>
     $(document).ready(function() {
       $(".send-dialog").on("click", function(){
-        FB.ui({
-          method: 'send',
-          link: $(this).attr("value"),
-        });
+        if (navigator.userAgent.indexOf("Mobi") > -1){
+          FB.ui({
+            method: 'share',
+            href: $(this).attr("value"),
+          }, function(response){});
+        } else {
+          FB.ui({
+            method: 'send',
+            link: $(this).attr("value"),
+          });
+        }
       });
     });
   <% end %>
