@@ -17,7 +17,11 @@ class ReservationPolicy < ApplicationPolicy
     record.reservation_owner == user
   end
 
-  def invited_friends?
+  def show_to_invited_friends?
     true
+  end
+
+  def join?
+    !record.participants.include?(user)
   end
 end

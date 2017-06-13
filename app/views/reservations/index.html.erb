@@ -97,7 +97,8 @@ Owner of:
   <br>
   <br>
 
-  <button class="send-dialog" value="<%= invited_friends_reservation_url(res)%>"> Share on facebook </button>
+  <button class="send-dialog" value="<%= show_to_invited_friends_reservation_url(res)%>?token=<%=res.token %>"> Share on facebook </button>
+  <a href="<%= show_to_invited_friends_reservation_url(res)%>?token=<%=res.token %>"> The link shared on facebook</a>
 
   <br>
   <br>
@@ -161,7 +162,10 @@ Participant in:
   <%= link_to "rate club", new_reservation_rating_path(res)  %>
   <br>
   <br>
-  <button class="send-dialog" value="<%= invited_friends_reservation_url(res)%>"> Share on facebook </button>
+
+  <button class="send-dialog" value="<%= show_to_invited_friends_reservation_url(res)%>?token=<%=res.token %>"> Share on facebook </button>
+  <a href="<%= show_to_invited_friends_reservation_url(res)%>?token=<%=res.token %>"> The link shared on facebook</a>
+
   <br>
   <br>
 <% end %>

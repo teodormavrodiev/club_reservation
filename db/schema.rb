@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170611102625) do
+ActiveRecord::Schema.define(version: 20170613124240) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -89,7 +89,9 @@ ActiveRecord::Schema.define(version: 20170611102625) do
     t.integer  "reservation_owner_id"
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
+    t.string   "token"
     t.index ["reservation_owner_id"], name: "index_reservations_on_reservation_owner_id", using: :btree
+    t.index ["token"], name: "index_reservations_on_token", unique: true, using: :btree
   end
 
   create_table "tables", force: :cascade do |t|

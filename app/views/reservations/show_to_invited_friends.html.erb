@@ -1,0 +1,40 @@
+Reservation in: <%= @reservation.tables.first.club.name %>
+  Capacity: <%= @reservation.capacity %>
+  <br>
+  Date: <%= @reservation.date %>
+  <br>
+  Tables:
+  <% @reservation.tables.each do |tab| %>
+    <%= tab.id %>,
+  <% end %>
+  <br>
+  Participants:
+  <% @reservation.participants.each do |par| %>
+    <%= par.full_name %>
+    <% if par.photo? %>
+      <%= cl_image_tag par.photo.path, width: 50, height: 60, crop: :fill %>
+    <% end %>
+    <br>
+  <% end %>
+  <br>
+  <br>
+  Comments:
+  <br>
+  <% @reservation.comments.each do |com| %>
+  <br>
+  <br>
+    <% if com.user.photo? %>
+      <%= cl_image_tag com.user.photo.path, width: 10, height: 15, crop: :fill %>
+    <% end %>
+    <%= com.user.full_name %> at datetime: <%= com.datetime %>
+    <%= com.information %>
+  <br>
+  <%= link_to "edit", edit_reservation_comment_path(@reservation, com)  %>
+  <%= link_to "delete", reservation_comment_path(@reservation, com), method: :delete  %>
+
+  <% end %>
+
+  <br>
+  <br>
+
+<%= link_to "Join reservation", join_reservation_path(@reservation)  %>
