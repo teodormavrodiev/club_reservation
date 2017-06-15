@@ -55,7 +55,18 @@ class ReservationsController < ApplicationController
 
     @reservation.participants << current_user
 
-    ReservationMailer.recently_joined(@reservation.id).deliver_now
+    #send mail to res_owner
+
+    ReservationMailer.recently_joined_to_owner(@reservation.id).deliver_now
+
+    #send mail to participants
+
+    @reservation.participants.each do |par|
+      ReservationMailer.recently_joined_to_participant(@reservation.id, par).deliver_now unless par == @reservation.participants.last
+    end
+
+    #send mail to user
+
     ReservationMailer.confirmation(@reservation.id).deliver_now
 
     redirect_to reservations_path

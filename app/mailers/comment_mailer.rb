@@ -1,20 +1,22 @@
 class CommentMailer < ApplicationMailer
 
-  def new_comment(comment_id)
+  def new_comment_to_owner(comment_id)
     @comment = Comment.find(comment_id)
-    @comment_owner = @comment.user
     @reservation = @comment.reservation
     club_name = @reservation.tables.first.club.name
 
     #mail to owner of reservation
 
-    mail(to: @reservation.reservation_owner.email, subject: 'New Comment for reservation in #{club_name}') unless @reservation.reservation_owner == @comment_owner
+    mail(to: @reservation.reservation_owner.email, subject: 'New Comment for reservation in #{club_name}')
 
-    #mail to participants in reservation
+  end
 
-    @reservation.participants.each do |par|
-      mail(to: par.email, subject: "New Comment for reservation in #{club_name}") unless par == @comment_owner
-    end
+  def new_comment_to_participant(comment_id, par)
+    @comment = Comment.find(comment_id)
+    @reservation = @comment.reservation
+    club_name = @reservation.tables.first.club.name
+
+    mail(to: par.email, subject: "New Comment for reservation in #{club_name}")
   end
 
 end

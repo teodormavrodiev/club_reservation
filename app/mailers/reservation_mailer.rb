@@ -1,21 +1,25 @@
 class ReservationMailer < ApplicationMailer
 
-  def recently_joined(reservation_id)
+  def recently_joined_to_owner(reservation_id)
     @reservation = Reservation.find(reservation_id)
     @last_joined_user = @reservation.participants.last
     club_name = @reservation.tables.first.club.name
 
     #mail to reservation owner
 
-    mail(to: @reservation.reservation_owner.email, subject: 'Welcome to TheTable')
-
-    #mail to participants
-
-    @reservation.participants.each do |par|
-      mail(to: par.email, subject: "#{@last_joined_user.full_name} joined your reservation in #{club_name}") unless par == @last_joined_user
-    end
+    mail(to: @reservation.reservation_owner.email, subject: '#{@last_joined_user.full_name} joined your reservation in #{club_name}')
 
   end
+
+  def recently_joined_to_participant(reservation_id, par)
+    @reservation = Reservation.find(reservation_id)
+    @last_joined_user = @reservation.participants.last
+    club_name = @reservation.tables.first.club.name
+
+    mail(to: par.email, subject: "#{@last_joined_user.full_name} joined your reservation in #{club_name}")
+
+  end
+
 
   def confirmation(reservation_id)
     @reservation = Reservation.find(reservation_id)
