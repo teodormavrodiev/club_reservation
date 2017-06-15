@@ -7,7 +7,7 @@ class CommentMailer < ApplicationMailer
 
     #mail to owner of reservation
 
-    mail(to: @reservation.reservation_owner.email, subject: 'New Comment for reservation in #{club_name}')
+    mail(to: @reservation.reservation_owner.email, subject: "New Comment for reservation in #{club_name}")
 
   end
 
