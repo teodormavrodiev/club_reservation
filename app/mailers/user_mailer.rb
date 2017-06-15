@@ -5,4 +5,5 @@ class UserMailer < ApplicationMailer
 
     mail(to: @user.email, subject: 'Welcome to TheTable')
   end
+
 end
