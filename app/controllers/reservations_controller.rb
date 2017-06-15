@@ -54,6 +54,10 @@ class ReservationsController < ApplicationController
     authorize @reservation
 
     @reservation.participants << current_user
+
+    ReservationMailer.recently_joined(@reservation.id).deliver_now
+    ReservationMailer.confirmation(@reservation.id).deliver_now
+
     redirect_to reservations_path
   end
 

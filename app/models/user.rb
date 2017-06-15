@@ -17,6 +17,8 @@ class User < ApplicationRecord
   validates :email, presence: true, format: { with: Devise::email_regexp }
   validates :full_name, presence: true
 
+  after_create :send_welcome_mail
+
 
   def self.find_for_facebook_oauth(auth)
     user_params = auth.slice(:provider, :uid)
@@ -40,4 +42,12 @@ class User < ApplicationRecord
 
     return user
   end
+
+  private
+
+  def send_welcome_mail
+    UserMailer.welcome(self.id).deliver_now
+  end
+
+
 end
