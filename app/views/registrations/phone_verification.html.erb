@@ -1,0 +1,7 @@
+Confirm your phone number here:
+
+<%= form_for(@user, url: phone_verification_confirmation_path(@user.id), method: :post) do |f| %>
+  <%= text_field_tag "Code" %>
+  <%= submit_tag "Give us your code" %>
+<% end %>
+
