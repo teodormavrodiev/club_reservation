@@ -1,3 +1,5 @@
+require 'twilio-ruby'
+
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -18,6 +20,7 @@ class User < ApplicationRecord
   validates :full_name, presence: true
 
   after_create :send_welcome_mail
+  # after_create :send_welcome_sms
 
 
   def self.find_for_facebook_oauth(auth)
@@ -48,6 +51,25 @@ class User < ApplicationRecord
   def send_welcome_mail
     UserMailer.welcome(self.id).deliver_now
   end
+
+  # def send_welcome_sms
+  #   account_sid = ENV['TWILIO_API_ACCOUNT_SID']
+  #   auth_token = ENV['TWILIO_API_AUTH_TOKEN']
+
+  #   Twilio.configure do |config|
+  #     config.account_sid = account_sid
+  #     config.auth_token = auth_token
+  #   end
+
+  #   @client = Twilio::REST::Client.new
+  #   @client.messages.create(
+  #     from: "+13238005977" ,
+  #     to: "#{phone_number}",
+  #     body: "Hey, #{full_name}! Welcome to TheTable. We use phone numbers for reservation invitations and
+  #     bill splitting. Please confirm your phone number to unlock this functionality by clicking the link below.
+  #     https://club-reservation.herokuapp.com/"
+  #   )
+  # end
 
 
 end
