@@ -25,4 +25,8 @@ Rails.application.routes.draw do
     resources :comments, except: [:index, :show, :new]
   end
 
+  # devise_scope :user do
+  #   get 'verify_phone_number/:id', to: "registrations#verify_phone_number"
+  # end
+
 end

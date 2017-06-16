@@ -9,7 +9,8 @@ user1 = User.new({
   full_name: Faker::Name.name,
   password: "password",
   password_confirmation: "password",
-  email: "teodor.test@gmail.com"
+  email: "teodor.test@gmail.com",
+  phone_number: "+359881421314131231"
   })
 
 user1.save!
@@ -18,7 +19,8 @@ user2 = User.new({
   full_name: Faker::Name.name,
   password: "password",
   password_confirmation: "password",
-  email: "teodor.test2@gmail.com"
+  email: "teodor.test2@gmail.com",
+  phone_number: "+3598814213141312311"
   })
 
 user2.save!

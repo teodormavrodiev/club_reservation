@@ -28,6 +28,8 @@ gem 'geocoder'
 
 gem 'gmaps4rails'
 
+gem 'twilio-ruby', '~> 4.13.0'
+
 source 'https://rails-assets.org' do
   gem "rails-assets-underscore"
 end
