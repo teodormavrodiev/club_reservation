@@ -1,0 +1,107 @@
+  <script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId            : '<%= ENV["FB_ID"] %>',
+      autoLogAppEvents : true,
+      xfbml            : true,
+      version          : 'v2.9'
+    });
+    FB.AppEvents.logPageView();
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
+</script>
+
+<% content_for(:after_js) do %>
+  <%= javascript_tag do %>
+    $(document).ready(function() {
+      $(".send-dialog").on("click", function(){
+        if (navigator.userAgent.indexOf("Mobi") > -1){
+          FB.ui({
+            method: 'share',
+            href: $(this).attr("value"),
+          }, function(response){});
+        } else {
+          FB.ui({
+            method: 'send',
+            link: $(this).attr("value"),
+          });
+        }
+      });
+    });
+  <% end %>
+<% end %>
+
+
+<% unless @reservation.kaparo_paid %>
+  Kaparo needs to be paid: <%= @reservation.amount_to_be_payed %> leva.
+<% end %>
+<br>
+<br>
+<%= link_to "Pay all", pay_all_reservation_path(@reservation, token: @reservation.token) %>
+<br>
+<br>
+
+Reservation in: <%= @reservation.tables.first.club.name %>
+<br>
+  Capacity: <%= @reservation.capacity %>
+  <br>
+  Date: <%= @reservation.date %>
+  <br>
+  Tables:
+  <% @reservation.tables.each do |tab| %>
+    <%= tab.id %>,
+  <% end %>
+  <br>
+  Participants:
+  <% @reservation.participants.each do |par| %>
+    <%= par.full_name %>
+    <% if par.photo? %>
+      <%= cl_image_tag par.photo.path, width: 50, height: 60, crop: :fill %>
+    <% end %>
+    <br>
+  <% end %>
+  <br>
+  <br>
+  Comments:
+  <br>
+  <% @reservation.comments.each do |com| %>
+  <br>
+  <br>
+    <% if com.user.photo? %>
+      <%= cl_image_tag com.user.photo.path, width: 10, height: 15, crop: :fill %>
+    <% end %>
+    <%= com.user.full_name %> at datetime: <%= com.datetime %>
+    <%= com.information %>
+  <br>
+  <%= link_to "edit", edit_reservation_comment_path(@reservation, com)  %>
+  <%= link_to "delete", reservation_comment_path(@reservation, com), method: :delete  %>
+
+  <% end %>
+
+  <br>
+  <br>
+  Add Comment:
+  <br>
+  <br>
+  <form action="<%= reservation_comments_path(@reservation) %>" method="POST">
+    <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
+    <%= text_field_tag "Your Comment" %>
+  <%= submit_tag "Leave a comment" %>
+  </form>
+  <br>
+  <br>
+
+<% if @reservation.participants.include?(current_user) || @reservation.reservation_owner == current_user %>
+  <button class="send-dialog" value="<%= reservation_url(@reservation)%>?token=<%=@reservation.token %>"> Share on facebook </button>
+  <a href="<%= reservation_url(@reservation)%>?token=<%=@reservation.token %>"> The link shared on facebook</a>
+<% else %>
+  <%= link_to "Join reservation", join_reservation_path(@reservation)  %>
+<% end %>

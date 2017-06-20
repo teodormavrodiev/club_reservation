@@ -14,12 +14,13 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :reservations, only: [:index] do
+  resources :reservations, only: [:index, :show] do
     member do
-      get 'show_to_invited_friends'
       get 'cancel'
       get 'join'
       get 'leave'
+      get 'pay_all'
+      post 'receive_nonce'
     end
     resources :ratings, only: [:new, :create]
     resources :comments, except: [:index, :show, :new]

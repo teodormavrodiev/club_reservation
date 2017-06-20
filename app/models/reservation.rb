@@ -12,4 +12,14 @@ class Reservation < ApplicationRecord
   validates :date, presence: true
   validates :reservation_owner_id, presence: true, numericality: true
 
+  def amount_to_be_payed
+    amount = 0
+    tables.each do |table|
+      if table.kaparo_required
+        amount += table.kaparo_amount
+      end
+    end
+    amount
+  end
+
 end

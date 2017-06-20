@@ -58,7 +58,9 @@ club2.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v149
 
 6.times { |i|
   table = Table.new({
-    capacity: 15
+    capacity: 15,
+    kaparo_required: true,
+    kaparo_amount: 300
     })
   table.club = club
   table.save!
@@ -66,7 +68,8 @@ club2.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v149
 
 6.times { |i|
   table = Table.new({
-    capacity: 15
+    capacity: 15,
+    kaparo_required: false
     })
   table.club = club2
   table.save!
@@ -86,7 +89,8 @@ club2.photo_urls = ["http://res.cloudinary.com/teodormavrodiev/image/upload/v149
 2.times { |i|
   reservation = Reservation.new({
     capacity: 15,
-    date: Date.today
+    date: Date.today,
+    kaparo_paid: true
     })
   reservation.reservation_owner = user1 if i == 0
   reservation.reservation_owner = user2 if i == 1
