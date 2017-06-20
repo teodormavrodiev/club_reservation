@@ -77,7 +77,11 @@ class ReservationsController < ApplicationController
     Braintree::Configuration.public_key = "kt5rfmngcswrbfpz"
     Braintree::Configuration.private_key = "2c2200af08494e0bbd221cc40ed4436b"
 
-    @braintree_token = Braintree::ClientToken.generate
+    if current_user.braintree_id
+      @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
+    else
+      @braintree_token = Braintree::ClientToken.generate
+    end
 
     @reservation = Reservation.find(params[:id])
     if params[:token] == @reservation.token
@@ -91,6 +95,8 @@ class ReservationsController < ApplicationController
   def receive_nonce
     @reservation = Reservation.find(params[:id])
     authorize @reservation
+
+    #if new client
 
     nonce_from_the_client = params[:payment_method_nonce]
 
