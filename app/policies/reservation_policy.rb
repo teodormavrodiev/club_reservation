@@ -25,11 +25,11 @@ class ReservationPolicy < ApplicationPolicy
     !record.participants.include?(user)
   end
 
-  def pay_all?
+  def pay_all_now?
     true
   end
 
-  def receive_nonce?
+  def receive_nonce_and_pay?
     true
   end
 end

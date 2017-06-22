@@ -19,8 +19,8 @@ Rails.application.routes.draw do
       get 'cancel'
       get 'join'
       get 'leave'
-      get 'pay_all'
-      post 'receive_nonce'
+      get 'pay_all_now'
+      post 'receive_nonce_and_pay'
     end
     resources :ratings, only: [:new, :create]
     resources :comments, except: [:index, :show, :new]

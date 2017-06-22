@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :reservations_as_participant, through: :partygoers, source: :reservation
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
+  has_many :bills
 
   has_attachment :photo
 

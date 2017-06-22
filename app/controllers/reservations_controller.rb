@@ -70,7 +70,7 @@ class ReservationsController < ApplicationController
     end
   end
 
-  def pay_all
+  def pay_all_now
     #move all these keys to application.yaml
     Braintree::Configuration.environment = :sandbox
     Braintree::Configuration.merchant_id = "pz35qwh6qkqv7xw6"
@@ -92,26 +92,55 @@ class ReservationsController < ApplicationController
     end
   end
 
-  def receive_nonce
+  def receive_nonce_and_pay
     @reservation = Reservation.find(params[:id])
     authorize @reservation
 
-    #if new client
+      nonce_from_the_client = params[:payment_method_nonce]
 
-    nonce_from_the_client = params[:payment_method_nonce]
+      #if new client
 
-    result = Braintree::Customer.create(
-      :payment_method_nonce => nonce_from_the_client
+      if current_user.braintree_id.nil?
+        result = Braintree::Customer.create(
+          :payment_method_nonce => nonce_from_the_client
+        )
+        if result.success?
+          current_user.braintree_id = result.customer.id
+          current_user.save!
+          p result.customer
+          p result.payment_method_token
+          p result.customer.payment_methods
+        else
+          p result.errors
+        end
+      else
+        result = Braintree::Customer.find(current_user.braintree_id)
+        p result
+      end
+
+    result = Braintree::Transaction.sale(
+      :amount => "#{@reservation.amount_to_be_payed}",
+      :payment_method_nonce => nonce_from_the_client,
+      :options => {
+        :submit_for_settlement => true
+      }
     )
 
     if result.success?
-      current_user.braintree_id = result.customer.id
-      current_user.save!
+      p result
+      bill = Bill.create(user: current_user, reservation: @reservation, date_time: DateTime.now, status: :submitted, transaction_id: result.transaction.id, amount: result.transaction.amount.to_f)
+      p bill
     else
       p result.errors
     end
 
 
+  end
+
+  def receive_nonce_and_split
+  end
+
+  def pay_with_split
   end
 
   def join
