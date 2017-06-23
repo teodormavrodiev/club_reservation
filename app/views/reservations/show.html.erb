@@ -41,7 +41,7 @@
 
 
 <% unless @reservation.kaparo_paid %>
-  Kaparo needs to be paid: <%= @reservation.amount_to_be_payed %> leva.
+  Kaparo needs to be paid: <%= @reservation.full_amount_to_be_payed %> leva.
 <% end %>
 <br>
 <br>

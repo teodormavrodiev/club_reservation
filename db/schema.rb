@@ -37,6 +37,7 @@ ActiveRecord::Schema.define(version: 20170622180408) do
     t.integer  "status"
     t.string   "transaction_id"
     t.float    "amount"
+    t.string   "one_time_nonce"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
     t.index ["reservation_id"], name: "index_bills_on_reservation_id", using: :btree
@@ -139,6 +140,7 @@ ActiveRecord::Schema.define(version: 20170622180408) do
     t.datetime "token_expiry"
     t.string   "phone_number"
     t.string   "braintree_id"
+    t.index ["braintree_id"], name: "index_users_on_braintree_id", unique: true, using: :btree
     t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   end

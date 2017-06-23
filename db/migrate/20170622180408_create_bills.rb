@@ -7,6 +7,7 @@ class CreateBills < ActiveRecord::Migration[5.0]
       t.integer :status
       t.string :transaction_id
       t.float :amount
+      t.string :one_time_nonce
 
       t.timestamps
     end

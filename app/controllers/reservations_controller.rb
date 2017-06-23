@@ -77,11 +77,13 @@ class ReservationsController < ApplicationController
     Braintree::Configuration.public_key = "kt5rfmngcswrbfpz"
     Braintree::Configuration.private_key = "2c2200af08494e0bbd221cc40ed4436b"
 
-    if current_user.braintree_id
-      @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
-    else
-      @braintree_token = Braintree::ClientToken.generate
+    begin
+      customer = Braintree::Customer.find(current_user.braintree_id)
+    rescue
+      customer = Braintree::Customer.create(id: current_user.braintree_id)
     end
+
+    @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
 
     @reservation = Reservation.find(params[:id])
     if params[:token] == @reservation.token
@@ -96,44 +98,15 @@ class ReservationsController < ApplicationController
     @reservation = Reservation.find(params[:id])
     authorize @reservation
 
-      nonce_from_the_client = params[:payment_method_nonce]
+    nonce_from_the_client = params[:payment_method_nonce]
 
-      #if new client
+    bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: @reservation.full_amount_to_be_payed.to_f, one_time_nonce: nonce_from_the_client)
 
-      if current_user.braintree_id.nil?
-        result = Braintree::Customer.create(
-          :payment_method_nonce => nonce_from_the_client
-        )
-        if result.success?
-          current_user.braintree_id = result.customer.id
-          current_user.save!
-          p result.customer
-          p result.payment_method_token
-          p result.customer.payment_methods
-        else
-          p result.errors
-        end
-      else
-        result = Braintree::Customer.find(current_user.braintree_id)
-        p result
-      end
+    bill.submit_for_settlement
 
-    result = Braintree::Transaction.sale(
-      :amount => "#{@reservation.amount_to_be_payed}",
-      :payment_method_nonce => nonce_from_the_client,
-      :options => {
-        :submit_for_settlement => true
-      }
-    )
+    p bill.status
 
-    if result.success?
-      p result
-      bill = Bill.create(user: current_user, reservation: @reservation, date_time: DateTime.now, status: :submitted, transaction_id: result.transaction.id, amount: result.transaction.amount.to_f)
-      p bill
-    else
-      p result.errors
-    end
-
+    bill.status == "submitted_for_settlement"
 
   end
 

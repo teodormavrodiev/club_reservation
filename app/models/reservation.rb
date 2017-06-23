@@ -5,7 +5,8 @@ class Reservation < ApplicationRecord
   has_many :partygoers, dependent: :destroy
   has_many :participants, through: :partygoers
   has_many :comments, dependent: :destroy
-  has_many :bills
+  #figure out a way to remove dependent destroy on a reservation
+  has_many :bills, dependent: :destroy
 
   has_secure_token
 
@@ -13,7 +14,7 @@ class Reservation < ApplicationRecord
   validates :date, presence: true
   validates :reservation_owner_id, presence: true, numericality: true
 
-  def amount_to_be_payed
+  def full_amount_to_be_payed
     amount = 0
     tables.each do |table|
       if table.kaparo_required
@@ -23,34 +24,34 @@ class Reservation < ApplicationRecord
     amount
   end
 
-  def amount_pending
-    amount_that_is_pending = 0
-    bills.each do |bill|
-      if bill.status == "pending"
-        amount_that_is_pending += bill.amount
-      end
-    end
-    amount_that_is_pending
-  end
+  # def amount_pending
+  #   amount_that_is_pending = 0
+  #   bills.each do |bill|
+  #     if bill.status == "pending"
+  #       amount_that_is_pending += bill.amount
+  #     end
+  #   end
+  #   amount_that_is_pending
+  # end
 
-  def amount_submitted
-    amount_that_is_submitted = 0
-    bills.each do |bill|
-      if bill.status == "submitted"
-        amount_that_is_submitted += bill.amount
-      end
-    end
-    amount_that_is_submitted
-  end
+  # def amount_submitted
+  #   amount_that_is_submitted = 0
+  #   bills.each do |bill|
+  #     if bill.status == "submitted"
+  #       amount_that_is_submitted += bill.amount
+  #     end
+  #   end
+  #   amount_that_is_submitted
+  # end
 
-  def amount_paid
-    amount_that_is_paid = 0
-    bills.each do |bill|
-      if bill.status == "paid"
-        amount_that_is_paid += bill.amount
-      end
-    end
-    amount_that_is_paid
-  end
+  # def amount_paid
+  #   amount_that_is_paid = 0
+  #   bills.each do |bill|
+  #     if bill.status == "paid"
+  #       amount_that_is_paid += bill.amount
+  #     end
+  #   end
+  #   amount_that_is_paid
+  # end
 
 end
