@@ -1,0 +1,38 @@
+<script src="https://js.braintreegateway.com/web/dropin/1.3.1/js/dropin.min.js"></script>
+
+
+<input type="number" id="payment" min="5">
+<div id="dropin-container"></div>
+<button id="submit-button">Request payment method</button>
+
+<% content_for(:after_js) do %>
+  <%= javascript_tag do %>
+      $(document).ready(function() {
+      var button = document.querySelector('#submit-button');
+
+      braintree.dropin.create({
+        authorization: '<%= @braintree_token %>',
+        container: '#dropin-container'
+      }, function (createErr, instance) {
+        button.addEventListener('click', function () {
+          instance.requestPaymentMethod(function (err, payload) {
+           $.ajax({
+             url: "<%= receive_nonce_and_create_unsent_bill_reservation_path(@reservation) %>",
+             type: "POST",
+             data: {payment_method_nonce:payload.nonce,
+                    payment_amount: $("#payment").val()},
+             success: function(response) {
+              console.log(payload);
+              console.log(payload.details);
+              alert("Thank you. A bill has been created.");
+              window.location.href = "<%= reservation_path(@reservation, token: @reservation.token) %>"
+             },
+            });
+          });
+        });
+      });
+    });
+  <% end %>
+<% end %>
+
+

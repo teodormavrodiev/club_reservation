@@ -13,13 +13,16 @@ class User < ApplicationRecord
   has_many :reservations_as_participant, through: :partygoers, source: :reservation
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
+  has_many :bills, dependent: :destroy
 
   has_attachment :photo
+  has_secure_token :braintree_id
 
   validates :email, presence: true, format: { with: Devise::email_regexp }
   validates :full_name, presence: true
 
   after_create :send_welcome_mail
+  # after_create :add_braintree_customer
   # after_create :send_welcome_sms
 
 
@@ -50,6 +53,12 @@ class User < ApplicationRecord
 
   def send_welcome_mail
     UserMailer.welcome(self.id).deliver_now
+  end
+
+  def add_braintree_customer
+    Braintree::Customer.create(
+      :id => braintree_id
+    )
   end
 
   # def send_welcome_sms

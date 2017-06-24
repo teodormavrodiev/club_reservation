@@ -16,9 +16,9 @@ class RegistrationsController < Devise::RegistrationsController
             phone_number: "#{@user.phone_number}"
             }
 
-    x = Net::HTTP.post_form(URI.parse("https://api.authy.com/protected/json/phones/verification/start"), data)
-    response = JSON.parse(x.body)
-    #check response is successful and act accordingly
+    # x = Net::HTTP.post_form(URI.parse("https://api.authy.com/protected/json/phones/verification/start"), data)
+    # response = JSON.parse(x.body)
+    # check response is successful and act accordingly
 
   end
 
