@@ -24,34 +24,80 @@ class Reservation < ApplicationRecord
     amount
   end
 
-  # def amount_pending
-  #   amount_that_is_pending = 0
-  #   bills.each do |bill|
-  #     if bill.status == "pending"
-  #       amount_that_is_pending += bill.amount
-  #     end
-  #   end
-  #   amount_that_is_pending
-  # end
+  def amount_unsent
+    amount_that_is_unsent = 0
+    bills.each do |bill|
+      if bill.status == "unsent"
+        amount_that_is_unsent += bill.amount
+      end
+    end
+    amount_that_is_unsent
+  end
 
-  # def amount_submitted
-  #   amount_that_is_submitted = 0
-  #   bills.each do |bill|
-  #     if bill.status == "submitted"
-  #       amount_that_is_submitted += bill.amount
-  #     end
-  #   end
-  #   amount_that_is_submitted
-  # end
+  def pay_split_bills
+    if amount_unsent >= full_amount_to_be_payed
+      accrue_convenience_fee_on_bills
+      authorize_all_bills
+      if all_bills_authorized?
+        submit_all_bills_for_settlement
+        if all_bills_submitted_for_settlement?
+          #send success emails to participants
+          self.kaparo_paid = true
+          self.save!
+          return "success"
+        else
+          #a bill wasn't submitted for settlement, inform the user if it's a click,
+          #if it's automatic send an sms to person who didn't get approved and prolong reservation period
+          #5 mins to let user switch payment methods
+          return "not all submitted"
+        end
+      else
+        #a bill wasn't authorized, inform the user, if it's a click, if it's automatic
+        #send an sms to person who didn't get authorized, and prolong reservation period for
+        #5 mins to let user switch payment methods
+        return "not all authorized"
+      end
+    else
+      #if from a button clicked by a user, tell him money isn't collected.
+      #if froma rake task automatically at the time of reservation resolve then
+      #sent emails that money wasn't collected in time, so reservation is void
+      return "Can't split bills, because money wasn't collected"
+    end
+  end
 
-  # def amount_paid
-  #   amount_that_is_paid = 0
-  #   bills.each do |bill|
-  #     if bill.status == "paid"
-  #       amount_that_is_paid += bill.amount
-  #     end
-  #   end
-  #   amount_that_is_paid
-  # end
+  def authorize_all_bills
+    bills.each do |bill|
+      bill.authorize
+    end
+  end
+
+  def all_bills_authorized?
+    bills.each do |bill|
+      if bill.status != "authorized"
+        break false
+      end
+    end
+  end
+
+  def submit_all_bills_for_settlement
+    bills.each do |bill|
+      bill.submit_for_settlement
+    end
+  end
+
+  def all_bills_submitted_for_settlement?
+    bills.each do |bill|
+      if bill.status != "submitted_for_settlement"
+        break false
+      end
+    end
+  end
+
+  def accrue_convenience_fee_on_bills
+    bills.each do |bill|
+      bill.amount = bill.amount*1.05
+      bill.save!
+    end
+  end
 
 end

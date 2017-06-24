@@ -71,11 +71,10 @@ class ReservationsController < ApplicationController
   end
 
   def pay_all_now
-    #move all these keys to application.yaml
     Braintree::Configuration.environment = :sandbox
-    Braintree::Configuration.merchant_id = "pz35qwh6qkqv7xw6"
-    Braintree::Configuration.public_key = "kt5rfmngcswrbfpz"
-    Braintree::Configuration.private_key = "2c2200af08494e0bbd221cc40ed4436b"
+    Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
+    Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
+    Braintree::Configuration.private_key = ENV["BRAINTREE_PRIVATE_KEY"]
 
     begin
       customer = Braintree::Customer.find(current_user.braintree_id)
@@ -102,18 +101,68 @@ class ReservationsController < ApplicationController
 
     bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: @reservation.full_amount_to_be_payed.to_f, one_time_nonce: nonce_from_the_client)
 
-    bill.submit_for_settlement
+    @reservation.accrue_convenience_fee_on_bills
+
+    @reservation.bills.first.submit_for_settlement
+
+    if @reservation.bills.first.status == "submitted_for_settlement"
+      @reservation.kaparo_paid = true
+      @reservation.save!
+    end
 
     p bill.status
 
-    bill.status == "submitted_for_settlement"
-
-  end
-
-  def receive_nonce_and_split
   end
 
   def pay_with_split
+    Braintree::Configuration.environment = :sandbox
+    Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
+    Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
+    Braintree::Configuration.private_key = ENV["BRAINTREE_PRIVATE_KEY"]
+
+    begin
+      customer = Braintree::Customer.find(current_user.braintree_id)
+    rescue
+      customer = Braintree::Customer.create(id: current_user.braintree_id)
+    end
+
+    @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
+
+    @reservation = Reservation.find(params[:id])
+    if params[:token] == @reservation.token
+      authorize @reservation
+    else
+      raise
+      #create a custom error for this
+    end
+
+  end
+
+  def receive_nonce_and_create_unsent_bill
+    @reservation = Reservation.find(params[:id])
+    authorize @reservation
+
+    nonce_from_the_client = params[:payment_method_nonce]
+    payment_amount = params[:payment_amount]
+
+    bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: payment_amount.to_f, one_time_nonce: nonce_from_the_client)
+
+    p bill.status
+
+    p bill.status == "unsent"
+  end
+
+  def pay_all_split_fees
+    @reservation = Reservation.find(params[:id])
+    if params[:token] == @reservation.token
+      authorize @reservation
+    else
+      raise
+      #create a custom error
+    end
+
+    notice_message = @reservation.pay_split_bills
+    redirect_to reservation_path(@reservation, token: @reservation.token), notice: notice_message
   end
 
   def join

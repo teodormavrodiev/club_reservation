@@ -32,4 +32,16 @@ class ReservationPolicy < ApplicationPolicy
   def receive_nonce_and_pay?
     true
   end
+
+  def pay_with_split?
+    true
+  end
+
+  def receive_nonce_and_create_unsent_bill?
+    true
+  end
+
+  def pay_all_split_fees?
+    true
+  end
 end

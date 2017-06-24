@@ -42,12 +42,23 @@
 
 <% unless @reservation.kaparo_paid %>
   Kaparo needs to be paid: <%= @reservation.full_amount_to_be_payed %> leva.
+  <br>
+  Contributed so far: <%= @reservation.amount_unsent %>
+  <br>
+  <% if @reservation.bills.where(user: current_user).first %>
+  Your share contributed:
+  <%= @reservation.bills.where(user: current_user).first.amount %>
+  <% end %>
+  <br>
+  <br>
+  <%= link_to "Pay full amount now", pay_all_now_reservation_path(@reservation, token: @reservation.token) %>
+  <br>
+  <%= link_to "Contribute to the bill", pay_with_split_reservation_path(@reservation, token: @reservation.token)  %>
+  <br>
+  <%= link_to "Pay split bill", pay_all_split_fees_reservation_path(@reservation, token: @reservation.token)  %>
+  <br>
 <% end %>
-<br>
-<br>
-<%= link_to "Pay all", pay_all_now_reservation_path(@reservation, token: @reservation.token) %>
-<br>
-<br>
+
 
 Reservation in: <%= @reservation.tables.first.club.name %>
 <br>

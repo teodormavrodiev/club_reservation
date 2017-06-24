@@ -22,7 +22,8 @@ Rails.application.routes.draw do
       get 'pay_all_now'
       post 'receive_nonce_and_pay'
       get 'pay_with_split'
-      post 'receive_nonce_and_split'
+      post 'receive_nonce_and_create_unsent_bill'
+      get 'pay_all_split_fees'
     end
     resources :ratings, only: [:new, :create]
     resources :comments, except: [:index, :show, :new]

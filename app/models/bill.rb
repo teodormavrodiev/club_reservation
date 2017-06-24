@@ -1,8 +1,13 @@
+Braintree::Configuration.environment = :sandbox
+Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
+Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
+Braintree::Configuration.private_key = ENV["BRAINTREE_PRIVATE_KEY"]
+
 class Bill < ApplicationRecord
   belongs_to :user
   belongs_to :reservation
 
-  enum status: [:unsent, :authorized, :submitted_for_settlement, :accepted, :rejected]
+  enum status: [:unsent, :authorized, :submitted_for_settlement, :accepted, :rejected, :voided]
 
   def authorize
     result = Braintree::Transaction.sale(
@@ -27,6 +32,9 @@ class Bill < ApplicationRecord
   end
 
   def submit_for_settlement
+    #if status is unsent, submit straight for settlement, by creating new transaction
+    #if status is authorized, get the transaction from Braintree using API
+    #and the bill's transaction_id and submit the transaction for settlement
     if status == "unsent"
       result = Braintree::Transaction.sale(
         :amount => amount.to_s,
@@ -59,6 +67,7 @@ class Bill < ApplicationRecord
   end
 
   def check_whether_settled_and_update
+    #returns nil if status from Braintree isn't accepted or rejected
     transaction = Braintree::Transaction.find(transaction_id)
     if transaction.status == "settled"
       self.status = "accepted"
