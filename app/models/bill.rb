@@ -60,15 +60,13 @@ class Bill < ApplicationRecord
   end
 
   def check_whether_settled_and_update
-    unless self.status == "unsent"
-      transaction = Braintree::Transaction.find(self.transaction_id)
-      if transaction.status == "settled"
-        self.status = "accepted"
-        self.save!
-      elsif transaction.status == "failed"
-        self.status = "rejected"
-        self.save!
-      end
+    transaction = Braintree::Transaction.find(self.transaction_id)
+    if transaction.status == "settled"
+      self.status = "accepted"
+      self.save!
+    elsif transaction.status == "failed"
+      self.status = "rejected"
+      self.save!
     end
   end
 
@@ -76,21 +74,13 @@ class Bill < ApplicationRecord
     check_whether_settled_and_update
     if self.status == "accepted"
       result = Braintree::Transaction.refund(self.transaction_id)
-      if result.success?
-        self.status = "void"
-        self.save!
-      else
+      unless result.success?
         BillMailer.bill_failed_to_refund(self.id).deliver_later
       end
     else
-      unless self.status =="unsent"
-        result = Braintree::Transaction.void(self.transaction_id)
-        if result.success?
-          self.status = "void"
-          self.save!
-        else
-          BillMailer.bill_failed_to_void(self.id).deliver_later
-        end
+      result = Braintree::Transaction.void(self.transaction_id)
+      unless result.success?
+        BillMailer.bill_failed_to_void(self.id).deliver_later
       end
     end
   end

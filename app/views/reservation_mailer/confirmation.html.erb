@@ -1,1 +1,6 @@
-This is a confirmation that you just joined a reservation!
+<p> Congratulations, <%= @user.full_name %>. You just joined a reservation in <%= @club_name %>. </p>
+<br>
+<br>
+<p> Your reservation is on the <%= @reservation.date %>. </p>
+<br>
+<%= link_to "See details here", reservation_url(@reservation, token: @reservation.token) %>

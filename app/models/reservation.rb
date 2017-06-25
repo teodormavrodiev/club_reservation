@@ -58,7 +58,7 @@ class Reservation < ApplicationRecord
           return "success"
         else
           bills.authorized.each do |auth_bill|
-            if self.created_at - DateTime.now < -3600
+            if self.seconds_since_creation >= 3600
               ResolveReservationJob.set(wait: 5.minutes).perform_later(self.id)
               user = auth_bill.user
               minutes_left = 5
@@ -67,7 +67,7 @@ class Reservation < ApplicationRecord
               auth_bill.destroy!
             else
               user = auth_bill.user
-              minutes_left = 60 -((self.created_at - DateTime.now )/60*-1).round(0)
+              minutes_left = 60 - self.minutes_since_creation
               auth_bill.send_email_for_failure_of_settlement(minutes_left)
               auth_bill.void
               auth_bill.destroy!
@@ -77,18 +77,16 @@ class Reservation < ApplicationRecord
         end
       else
         bills.unsent.each do |unsent_bill|
-          if self.created_at - DateTime.now < -3600
+          if self.seconds_since_creation > 3600
             ResolveReservationJob.set(wait: 5.minutes).perform_later(self.id)
             user = unsent_bill.user
             minutes_left = 5
             unsent_bill.send_email_for_failure_of_authorization(minutes_left)
-            unsent_bill.void
             unsent_bill.destroy!
           else
             user = unsent_bill.user
-            minutes_left = 60 -((self.created_at - DateTime.now )/60*-1).round(0)
+            minutes_left = 60 - self.minutes_since_creation
             unsent_bill.send_email_for_failure_of_authorization(minutes_left)
-            unsent_bill.void
             unsent_bill.destroy!
           end
         end
@@ -125,5 +123,13 @@ class Reservation < ApplicationRecord
         break false
       end
     end
+  end
+
+  def seconds_since_creation
+    (self.created_at - DateTime.now)*(-1)
+  end
+
+  def minutes_since_creation
+    ((self.created_at - DateTime.now)*(-1) / 60).round(0)
   end
 end

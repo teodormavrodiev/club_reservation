@@ -1,1 +1,6 @@
-Your reservation has been recently joined by another dear reservation owner!
+<p> <%= @user.full_name %> just joined your reservation in <%= @club_name %>. </p>
+<br>
+<br>
+<p> Your reservation is on the <%= @reservation.date %>. </p>
+<br>
+<%= link_to "See details here", reservation_url(@reservation, token: @reservation.token) %>

@@ -53,7 +53,7 @@ class ReservationsController < ApplicationController
     res.save!
 
     if kaparo_required
-      ResolveReservationJob.set(wait:60.minutes).perform_later(res.id)
+      ResolveReservationJob.set(wait:2.minutes).perform_later(res.id)
       redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
     else
       redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
@@ -165,21 +165,14 @@ class ReservationsController < ApplicationController
 
     @reservation.participants << current_user
 
-    #send mail to res_owner
+    if @reservation.participants.include?(current_user)
+      ReservationMailer.recently_joined_to_owner(@reservation.id, current_user.id).deliver_later
+      ReservationMailer.confirmation(@reservation.id, current_user.id).deliver_later
 
-    ReservationMailer.recently_joined_to_owner(@reservation.id, current_user).deliver_now
-
-    #send mail to participants
-
-    @reservation.participants.each do |par|
-      ReservationMailer.recently_joined_to_participant(@reservation.id, par, current_user).deliver_now unless par == current_user
+      redirect_to reservation_path(@reservation, token: @reservation.token), notice: "Successfully joined reservation."
+    else
+      redirect_to reservation_path(@reservation, token: @reservation.token), alert: "There was an error, please try again."
     end
-
-    #send mail to user
-
-    ReservationMailer.confirmation(@reservation.id, current_user).deliver_now
-
-    redirect_to reservation_path(@reservation, token: @reservation.token), notice: "Successfully joined reservation."
   end
 
   def leave
