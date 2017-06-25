@@ -52,7 +52,7 @@ class User < ApplicationRecord
   private
 
   def send_welcome_mail
-    UserMailer.welcome(self.id).deliver_now
+    UserMailer.welcome(self.id).deliver_later
   end
 
   def add_braintree_customer

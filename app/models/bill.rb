@@ -7,7 +7,9 @@ class Bill < ApplicationRecord
   belongs_to :user
   belongs_to :reservation
 
-  enum status: [:unsent, :authorized, :submitted_for_settlement, :accepted, :rejected, :voided]
+  after_create :accrue_convenience_fee
+
+  enum status: [:unsent, :authorized, :submitted_for_settlement, :accepted, :rejected]
 
   def authorize
     result = Braintree::Transaction.sale(
@@ -25,9 +27,6 @@ class Bill < ApplicationRecord
       self.status = "authorized"
       self.date_time = DateTime.now
       self.save!
-    else
-      #raise an error
-      false
     end
   end
 
@@ -50,36 +49,67 @@ class Bill < ApplicationRecord
         self.status = "submitted_for_settlement"
         self.date_time = DateTime.now
         self.save!
-      else
-        #raise an error
-        false
       end
     elsif status == "authorized"
-      result = Braintree::Transaction.submit_for_settlement(transaction_id)
+      result = Braintree::Transaction.submit_for_settlement(self.transaction_id)
       if result.success?
         self.status = "submitted_for_settlement"
         self.save!
-      else
-        #raise an error
-        false
       end
     end
   end
 
   def check_whether_settled_and_update
-    #returns nil if status from Braintree isn't accepted or rejected
-    transaction = Braintree::Transaction.find(transaction_id)
-    if transaction.status == "settled"
-      self.status = "accepted"
-      self.save!
-    elsif transaction.status == "failed"
-      self.status = "rejected"
-      self.save!
+    unless self.status == "unsent"
+      transaction = Braintree::Transaction.find(self.transaction_id)
+      if transaction.status == "settled"
+        self.status = "accepted"
+        self.save!
+      elsif transaction.status == "failed"
+        self.status = "rejected"
+        self.save!
+      end
     end
   end
 
-  def send_email_confirmation
+  def void
+    check_whether_settled_and_update
+    if self.status == "accepted"
+      result = Braintree::Transaction.refund(self.transaction_id)
+      if result.success?
+        self.status = "void"
+        self.save!
+      else
+        BillMailer.bill_failed_to_refund(self.id).deliver_later
+      end
+    else
+      unless self.status =="unsent"
+        result = Braintree::Transaction.void(self.transaction_id)
+        if result.success?
+          self.status = "void"
+          self.save!
+        else
+          BillMailer.bill_failed_to_void(self.id).deliver_later
+        end
+      end
+    end
+  end
 
+  def send_email_confirmation_after_submitted
+    BillMailer.bill_submitted_successfully(self.id).deliver_later
+  end
+
+  def send_email_for_failure_of_settlement(time_to_respond)
+    BillMailer.failure_to_settle(self.id, time_to_respond).deliver_later
+  end
+
+  def send_email_for_failure_of_authorization(time_to_respond)
+    BillMailer.failure_to_authorize(self.id, time_to_respond).deliver_later
+  end
+
+  def accrue_convenience_fee
+    self.amount = self.amount*1.05
+    self.save!
   end
 
 end

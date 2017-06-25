@@ -30,10 +30,6 @@ class ReservationsController < ApplicationController
     res.tables = res_tables
     res.reservation_owner = current_user
 
-    #check if table requires kaparo. If yes, redirect to show with
-    #a request to pay kaparo and payments options. If no, redirect to
-    #show with a success message and option to invite friends.
-
     kaparo_required = false
 
     res.tables.each do |table|
@@ -47,11 +43,17 @@ class ReservationsController < ApplicationController
     end
 
     authorize res
+
+    if kaparo_required == true
+      res.kaparo_paid = false
+    else
+      res.kaparo_paid = true
+    end
+
     res.save!
 
-    #initiate job that checks reservation in an hour if kaparo is required
     if kaparo_required
-      #initiate reservation check in an hour with a background job
+      ResolveReservationJob.set(wait:60.minutes).perform_later(res.id)
       redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
     else
       redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
@@ -101,16 +103,12 @@ class ReservationsController < ApplicationController
 
     bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: @reservation.full_amount_to_be_payed.to_f, one_time_nonce: nonce_from_the_client)
 
-    @reservation.accrue_convenience_fee_on_bills
-
     @reservation.bills.first.submit_for_settlement
 
     if @reservation.bills.first.status == "submitted_for_settlement"
       @reservation.kaparo_paid = true
       @reservation.save!
     end
-
-    p bill.status
 
   end
 
@@ -146,10 +144,6 @@ class ReservationsController < ApplicationController
     payment_amount = params[:payment_amount]
 
     bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: payment_amount.to_f, one_time_nonce: nonce_from_the_client)
-
-    p bill.status
-
-    p bill.status == "unsent"
   end
 
   def pay_all_split_fees

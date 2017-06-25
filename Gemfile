@@ -32,6 +32,9 @@ gem 'twilio-ruby', '~> 4.13.0'
 
 gem "braintree", "~> 2.76.0"
 
+gem 'sidekiq'
+gem 'sidekiq-failures', github: 'mhfs/sidekiq-failures'
+
 source 'https://rails-assets.org' do
   gem "rails-assets-underscore"
 end

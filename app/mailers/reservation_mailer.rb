@@ -26,4 +26,8 @@ class ReservationMailer < ApplicationMailer
     mail(to: just_joined.email, subject: "Confirmation for your reservation in #{club_name}")
   end
 
+  def reservation_voided(reservation_id)
+
+  end
+
 end

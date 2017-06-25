@@ -43,7 +43,7 @@
 <% unless @reservation.kaparo_paid %>
   Kaparo needs to be paid: <%= @reservation.full_amount_to_be_payed %> leva.
   <br>
-  Contributed so far: <%= @reservation.amount_unsent %>
+  Contributed so far: <%= @reservation.amount_collected %>
   <br>
   <% if @reservation.bills.where(user: current_user).first %>
   Your share contributed:
