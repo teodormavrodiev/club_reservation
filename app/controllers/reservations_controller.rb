@@ -53,7 +53,7 @@ class ReservationsController < ApplicationController
     res.save!
 
     if kaparo_required
-      ResolveReservationJob.set(wait:2.minutes).perform_later(res.id)
+      ResolveReservationJob.set(wait: 60.minutes).perform_later(res.id)
       redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
     else
       redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
