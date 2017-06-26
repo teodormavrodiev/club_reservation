@@ -1,0 +1,6 @@
+<p> Hello, <%= @owner.full_name %>. </p>
+<br>
+<p> This is to notify you that your payment for your reservation in <%= @club_name %> on the <%= @reservation.date %> failed. There could be many reasons for this. </p>
+<p> We didn't charge you <%= @bill.amount %>. There are still <%= @time_to_respond %> minutes left to complete your reservation. </p>
+<br>
+<p> Please visit this <%= link_to "link", pay_with_split_reservation_url(@reservation, token: @reservation.token) %> if you want to try again. </p>

@@ -1,1 +1,6 @@
-There has been a new comment in a reservation you are a part of.
+<p> <%= @comment.user.full_name %> made a new comment to your reservation in <%= @club_name %> on the <%= @reservation.date %>. </p>
+<br>
+<br>
+<%= @comment.user.full_name %> : <%= @comment.information %>
+<br>
+<p> <%= link_to "Respond here", reservation_url(@reservation, token: @reservation.token)  %> </p>

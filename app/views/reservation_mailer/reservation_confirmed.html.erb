@@ -1,0 +1,7 @@
+<p> This email is in order to confirm your reservation in club <%= @club_name %>
+  on the <%= @reservation.date %>.
+</p>
+<p> You can see it <%= link_to "here", reservation_url(@reservation, token: @reservation.token) %>, and you can also send this private link to your friends to let them join <%= reservation_url(@reservation, token: @reservation.token) %>.
+</p>
+<p> You can also invite them on facebook from this <%= link_to "page", reservation_url(@reservation, token: @reservation.token) %>. </p>
+

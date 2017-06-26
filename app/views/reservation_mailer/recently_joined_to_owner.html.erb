@@ -3,4 +3,4 @@
 <br>
 <p> Your reservation is on the <%= @reservation.date %>. </p>
 <br>
-<%= link_to "See details here", reservation_url(@reservation, token: @reservation.token) %>
+<p> <%= link_to "See details here", reservation_url(@reservation, token: @reservation.token) %> </p>
