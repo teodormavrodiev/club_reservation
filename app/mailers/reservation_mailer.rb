@@ -1,29 +1,35 @@
 class ReservationMailer < ApplicationMailer
 
-  def recently_joined_to_owner(reservation_id, just_joined)
+  def recently_joined_to_owner(reservation_id, just_joined_id)
     @reservation = Reservation.find(reservation_id)
-    club_name = @reservation.tables.first.club.name
+    @club_name = @reservation.tables.first.club.name
+    @user = User.find(just_joined_id)
 
-    #mail to reservation owner
-
-    mail(to: @reservation.reservation_owner.email, subject: "#{just_joined.full_name} joined your reservation in #{club_name}")
-
-  end
-
-  def recently_joined_to_participant(reservation_id, par, just_joined)
-    @reservation = Reservation.find(reservation_id)
-    club_name = @reservation.tables.first.club.name
-
-    mail(to: par.email, subject: "#{just_joined.full_name} joined your reservation in #{club_name}")
-
+    mail(to: @reservation.reservation_owner.email, subject: "#{@user.full_name} joined your reservation in #{@club_name}")
   end
 
 
-  def confirmation(reservation_id, just_joined)
+  def confirmation_for_joining(reservation_id, just_joined_id)
     @reservation = Reservation.find(reservation_id)
-    club_name = @reservation.tables.first.club.name
+    @club_name = @reservation.tables.first.club.name
+    @user = User.find(just_joined_id)
 
-    mail(to: just_joined.email, subject: "Confirmation for your reservation in #{club_name}")
+    mail(to: @user.email, subject: "Confirmation for joining the reservation in #{@club_name}")
+  end
+
+  def reservation_cancelled(reservation_id)
+    @reservation = Reservation.find(reservation_id)
+    @club_name = @reservation.tables.first.club.name
+
+    mail(to: @reservation.reservation_owner.email, subject: "Your reservation to #{@club_name} has been cancelled.")
+  end
+
+  def reservation_confirmed(reservation_id, user_id)
+    @reservation = Reservation.find(reservation_id)
+    @club_name = @reservation.tables.first.club.name
+    @user = User.find(user_id)
+
+    mail(to: @user.email, subject: "Your reservation to #{@club_name} has been confirmed.")
   end
 
 end

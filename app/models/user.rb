@@ -49,10 +49,20 @@ class User < ApplicationRecord
     return user
   end
 
+  def authorize_unsent_bills
+    bills.unsent.each do |bill|
+      bill.authorize
+    end
+    bills.unsent.each do |bill|
+      BillMailer.user_bill_failure_to_authorize(bill.id).deliver_now
+      bill.destroy!
+    end
+  end
+
   private
 
   def send_welcome_mail
-    UserMailer.welcome(self.id).deliver_now
+    UserMailer.welcome(self.id).deliver_later
   end
 
   def add_braintree_customer

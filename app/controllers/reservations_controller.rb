@@ -30,10 +30,6 @@ class ReservationsController < ApplicationController
     res.tables = res_tables
     res.reservation_owner = current_user
 
-    #check if table requires kaparo. If yes, redirect to show with
-    #a request to pay kaparo and payments options. If no, redirect to
-    #show with a success message and option to invite friends.
-
     kaparo_required = false
 
     res.tables.each do |table|
@@ -47,17 +43,21 @@ class ReservationsController < ApplicationController
     end
 
     authorize res
+
+    if kaparo_required == true
+      res.kaparo_paid = false
+    else
+      res.kaparo_paid = true
+    end
+
     res.save!
 
-    #initiate job that checks reservation in an hour if kaparo is required
     if kaparo_required
-      #initiate reservation check in an hour with a background job
+      ResolveReservationJob.set(wait: 60.minutes).perform_later(res.id)
       redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
     else
       redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
     end
-
-
   end
 
   def show
@@ -71,6 +71,14 @@ class ReservationsController < ApplicationController
   end
 
   def pay_all_now
+    pay
+  end
+
+  def pay_with_split
+    pay
+  end
+
+  def pay
     Braintree::Configuration.environment = :sandbox
     Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
     Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
@@ -81,6 +89,8 @@ class ReservationsController < ApplicationController
     rescue
       customer = Braintree::Customer.create(id: current_user.braintree_id)
     end
+
+    current_user.authorize_unsent_bills
 
     @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
 
@@ -101,41 +111,18 @@ class ReservationsController < ApplicationController
 
     bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: @reservation.full_amount_to_be_payed.to_f, one_time_nonce: nonce_from_the_client)
 
-    @reservation.accrue_convenience_fee_on_bills
+    @reservation.bills.last.submit_for_settlement
 
-    @reservation.bills.first.submit_for_settlement
-
-    if @reservation.bills.first.status == "submitted_for_settlement"
+    if @reservation.bills.last.status == "submitted_for_settlement"
+      @reservation.bills.last.send_email_confirmation_after_submitted
+      @reservation.cleanse_unsent_or_authorized_bills_when_paying_in_full
       @reservation.kaparo_paid = true
       @reservation.save!
+      @reservation.participants.each do |user|
+        ReservationMailer.reservation_confirmed(@reservation.id, user.id).deliver_later
+      end
+      ReservationMailer.reservation_confirmed(@reservation.id, @reservation.reservation_owner.id).deliver_later
     end
-
-    p bill.status
-
-  end
-
-  def pay_with_split
-    Braintree::Configuration.environment = :sandbox
-    Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
-    Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
-    Braintree::Configuration.private_key = ENV["BRAINTREE_PRIVATE_KEY"]
-
-    begin
-      customer = Braintree::Customer.find(current_user.braintree_id)
-    rescue
-      customer = Braintree::Customer.create(id: current_user.braintree_id)
-    end
-
-    @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
-
-    @reservation = Reservation.find(params[:id])
-    if params[:token] == @reservation.token
-      authorize @reservation
-    else
-      raise
-      #create a custom error for this
-    end
-
   end
 
   def receive_nonce_and_create_unsent_bill
@@ -146,10 +133,6 @@ class ReservationsController < ApplicationController
     payment_amount = params[:payment_amount]
 
     bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: payment_amount.to_f, one_time_nonce: nonce_from_the_client)
-
-    p bill.status
-
-    p bill.status == "unsent"
   end
 
   def pay_all_split_fees
@@ -171,21 +154,14 @@ class ReservationsController < ApplicationController
 
     @reservation.participants << current_user
 
-    #send mail to res_owner
+    if @reservation.participants.include?(current_user)
+      ReservationMailer.recently_joined_to_owner(@reservation.id, current_user.id).deliver_later
+      ReservationMailer.confirmation_for_joining(@reservation.id, current_user.id).deliver_later
 
-    ReservationMailer.recently_joined_to_owner(@reservation.id, current_user).deliver_now
-
-    #send mail to participants
-
-    @reservation.participants.each do |par|
-      ReservationMailer.recently_joined_to_participant(@reservation.id, par, current_user).deliver_now unless par == current_user
+      redirect_to reservation_path(@reservation, token: @reservation.token), notice: "Successfully joined reservation."
+    else
+      redirect_to reservation_path(@reservation, token: @reservation.token), alert: "There was an error, please try again."
     end
-
-    #send mail to user
-
-    ReservationMailer.confirmation(@reservation.id, current_user).deliver_now
-
-    redirect_to reservation_path(@reservation, token: @reservation.token), notice: "Successfully joined reservation."
   end
 
   def leave

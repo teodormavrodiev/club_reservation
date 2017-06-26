@@ -24,43 +24,89 @@ class Reservation < ApplicationRecord
     amount
   end
 
-  def amount_unsent
-    amount_that_is_unsent = 0
+  def amount_collected
+    amount_that_is_collected = 0
     bills.each do |bill|
-      if bill.status == "unsent"
-        amount_that_is_unsent += bill.amount
+      if bill.status == "unsent" || bill.status == "authorized"
+        amount_that_is_collected += bill.amount / 1.05
       end
     end
-    amount_that_is_unsent
+    amount_that_is_collected
+  end
+
+  def amount_paid
+    amount_already_paid = 0
+    bills.each do |bill|
+      if bill.status == "submitted_for_settlement" || bill.status == "accepted"
+        amount_already_paid += bill.amount / 1.05
+      end
+    end
+    amount_already_paid
+  end
+
+  def share_contributed_by_user(id)
+    user = User.find(id)
+    bills = self.bills.where(user: user)
+    amount = 0
+    bills.each do |bill|
+      amount += bill.amount / 1.05
+    end
+    amount
   end
 
   def pay_split_bills
-    if amount_unsent >= full_amount_to_be_payed
-      accrue_convenience_fee_on_bills
+    if amount_collected == full_amount_to_be_payed - amount_paid
       authorize_all_bills
       if all_bills_authorized?
         submit_all_bills_for_settlement
         if all_bills_submitted_for_settlement?
-          #send success emails to participants
+          bills.each do |bill|
+            bill.send_email_confirmation_after_submitted
+          end
           self.kaparo_paid = true
           self.save!
+          self.participants.each do |participant|
+            ReservationMailer.reservation_confirmed(self.id, participant.id).deliver_later
+          end
+          ReservationMailer.reservation_confirmed(self.id, self.reservation_owner.id).deliver_later
           return "success"
         else
-          #a bill wasn't submitted for settlement, inform the user if it's a click,
-          #if it's automatic send an sms to person who didn't get approved and prolong reservation period
-          #5 mins to let user switch payment methods
+          bills.authorized.each do |auth_bill|
+            if self.seconds_since_creation >= 3600
+              ResolveReservationJob.set(wait: 5.minutes).perform_later(self.id)
+              user = auth_bill.user
+              minutes_left = 5
+              BillMailer.reservation_bill_failure_to_settle(auth_bill.id, minutes_left).deliver_now
+              auth_bill.void
+              auth_bill.destroy!
+            else
+              user = auth_bill.user
+              minutes_left = 60 - self.minutes_since_creation
+              BillMailer.reservation_bill_failure_to_settle(auth_bill.id, minutes_left).deliver_now
+              auth_bill.void
+              auth_bill.destroy!
+            end
+          end
           return "not all submitted"
         end
       else
-        #a bill wasn't authorized, inform the user, if it's a click, if it's automatic
-        #send an sms to person who didn't get authorized, and prolong reservation period for
-        #5 mins to let user switch payment methods
+        bills.unsent.each do |unsent_bill|
+          if self.seconds_since_creation >= 3600
+            ResolveReservationJob.set(wait: 5.minutes).perform_later(self.id)
+            user = unsent_bill.user
+            minutes_left = 5
+            BillMailer.reservation_bill_failure_to_authorize(unsent_bill.id, minutes_left).deliver_now
+            unsent_bill.destroy!
+          else
+            user = unsent_bill.user
+            minutes_left = 60 - self.minutes_since_creation
+            BillMailer.reservation_bill_failure_to_authorize(unsent_bill.id, minutes_left).deliver_now
+            unsent_bill.destroy!
+          end
+        end
         return "not all authorized"
       end
     else
-      #if from a button clicked by a user, tell him money isn't collected.
-      #if froma rake task automatically at the time of reservation resolve then
-      #sent emails that money wasn't collected in time, so reservation is void
       return "Can't split bills, because money wasn't collected"
     end
   end
@@ -73,7 +119,7 @@ class Reservation < ApplicationRecord
 
   def all_bills_authorized?
     bills.each do |bill|
-      if bill.status != "authorized"
+      if bill.status == "unsent"
         break false
       end
     end
@@ -87,16 +133,27 @@ class Reservation < ApplicationRecord
 
   def all_bills_submitted_for_settlement?
     bills.each do |bill|
-      if bill.status != "submitted_for_settlement"
+      if bill.status == "unsent" || bill.status == "authorized"
         break false
       end
     end
   end
 
-  def accrue_convenience_fee_on_bills
-    bills.each do |bill|
-      bill.amount = bill.amount*1.05
-      bill.save!
+  def seconds_since_creation
+    (self.created_at - DateTime.now)*(-1)
+  end
+
+  def minutes_since_creation
+    ((self.created_at - DateTime.now)*(-1) / 60).round(0)
+  end
+
+  def cleanse_unsent_or_authorized_bills_when_paying_in_full
+    bills.authorized.each do |bill|
+      bill.void
+      bill.destroy!
+    end
+    bills.unsent.each do |bill|
+      bill.destroy!
     end
   end
 
