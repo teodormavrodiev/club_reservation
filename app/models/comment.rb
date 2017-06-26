@@ -14,11 +14,11 @@ class Comment < ApplicationRecord
 
   def send_new_comment_mails
     #send to owner
-    CommentMailer.new_comment_to_owner(self.id).deliver_now unless self.user == self.reservation.reservation_owner
+    CommentMailer.new_comment_to_owner(self.id).deliver_later unless self.user == self.reservation.reservation_owner
 
     #send to participants
     self.reservation.participants.each do |par|
-      CommentMailer.new_comment_to_participant(self.id, par).deliver_now unless self.user == par
+      CommentMailer.new_comment_to_participant(self.id, par.id).deliver_later unless self.user == par
     end
 
   end

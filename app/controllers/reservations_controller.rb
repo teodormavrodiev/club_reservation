@@ -56,6 +56,10 @@ class ReservationsController < ApplicationController
       ResolveReservationJob.set(wait: 60.minutes).perform_later(res.id)
       redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
     else
+      res.participants.each do |user|
+        ReservationMailer.reservation_confirmed(res.id, user.id).deliver_later
+      end
+      ReservationMailer.reservation_confirmed(res.id, res.reservation_owner.id).deliver_later
       redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
     end
   end
