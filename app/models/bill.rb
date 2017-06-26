@@ -75,26 +75,18 @@ class Bill < ApplicationRecord
     if self.status == "accepted"
       result = Braintree::Transaction.refund(self.transaction_id)
       unless result.success?
-        BillMailer.bill_failed_to_refund(self.id).deliver_later
+        BillMailer.bill_failed_to_refund(self.transaction_id).deliver_later
       end
     else
       result = Braintree::Transaction.void(self.transaction_id)
       unless result.success?
-        BillMailer.bill_failed_to_void(self.id).deliver_later
+        BillMailer.bill_failed_to_void(self.transaction_id).deliver_later
       end
     end
   end
 
   def send_email_confirmation_after_submitted
     BillMailer.bill_submitted_successfully(self.id).deliver_later
-  end
-
-  def send_email_for_failure_of_settlement(time_to_respond)
-    BillMailer.failure_to_settle(self.id, time_to_respond).deliver_later
-  end
-
-  def send_email_for_failure_of_authorization(time_to_respond)
-    BillMailer.failure_to_authorize(self.id, time_to_respond).deliver_later
   end
 
   def accrue_convenience_fee

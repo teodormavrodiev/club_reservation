@@ -44,8 +44,18 @@ class Reservation < ApplicationRecord
     amount_already_paid
   end
 
+  def share_contributed_by_user(id)
+    user = User.find(id)
+    bills = self.bills.where(user: user)
+    amount = 0
+    bills.each do |bill|
+      amount += bill.amount / 1.05
+    end
+    amount
+  end
+
   def pay_split_bills
-    if amount_collected >= full_amount_to_be_payed - amount_paid
+    if amount_collected == full_amount_to_be_payed - amount_paid
       authorize_all_bills
       if all_bills_authorized?
         submit_all_bills_for_settlement
@@ -55,6 +65,10 @@ class Reservation < ApplicationRecord
           end
           self.kaparo_paid = true
           self.save!
+          self.participants.each do |participant|
+            ReservationMailer.reservation_confirmed(self.id, participant.id).deliver_later
+          end
+          ReservationMailer.reservation_confirmed(self.id, self.reservation_owner.id).deliver_later
           return "success"
         else
           bills.authorized.each do |auth_bill|
@@ -62,13 +76,13 @@ class Reservation < ApplicationRecord
               ResolveReservationJob.set(wait: 5.minutes).perform_later(self.id)
               user = auth_bill.user
               minutes_left = 5
-              auth_bill.send_email_for_failure_of_settlement(minutes_left)
+              BillMailer.reservation_bill_failure_to_settle(auth_bill.id, minutes_left).deliver_now
               auth_bill.void
               auth_bill.destroy!
             else
               user = auth_bill.user
               minutes_left = 60 - self.minutes_since_creation
-              auth_bill.send_email_for_failure_of_settlement(minutes_left)
+              BillMailer.reservation_bill_failure_to_settle(auth_bill.id, minutes_left).deliver_now
               auth_bill.void
               auth_bill.destroy!
             end
@@ -77,16 +91,16 @@ class Reservation < ApplicationRecord
         end
       else
         bills.unsent.each do |unsent_bill|
-          if self.seconds_since_creation > 3600
+          if self.seconds_since_creation >= 3600
             ResolveReservationJob.set(wait: 5.minutes).perform_later(self.id)
             user = unsent_bill.user
             minutes_left = 5
-            unsent_bill.send_email_for_failure_of_authorization(minutes_left)
+            BillMailer.reservation_bill_failure_to_authorize(unsent_bill.id, minutes_left).deliver_now
             unsent_bill.destroy!
           else
             user = unsent_bill.user
             minutes_left = 60 - self.minutes_since_creation
-            unsent_bill.send_email_for_failure_of_authorization(minutes_left)
+            BillMailer.reservation_bill_failure_to_authorize(unsent_bill.id, minutes_left).deliver_now
             unsent_bill.destroy!
           end
         end
@@ -132,4 +146,15 @@ class Reservation < ApplicationRecord
   def minutes_since_creation
     ((self.created_at - DateTime.now)*(-1) / 60).round(0)
   end
+
+  def cleanse_unsent_or_authorized_bills_when_paying_in_full
+    bills.authorized.each do |bill|
+      bill.void
+      bill.destroy!
+    end
+    bills.unsent.each do |bill|
+      bill.destroy!
+    end
+  end
+
 end

@@ -47,7 +47,7 @@
   <br>
   <% if @reservation.bills.where(user: current_user).first %>
   Your share contributed:
-  <%= @reservation.bills.where(user: current_user).first.amount %>
+  <%= @reservation.share_contributed_by_user(current_user.id) %>
   <% end %>
   <br>
   <br>

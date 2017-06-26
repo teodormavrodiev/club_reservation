@@ -58,8 +58,6 @@ class ReservationsController < ApplicationController
     else
       redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
     end
-
-
   end
 
   def show
@@ -73,6 +71,14 @@ class ReservationsController < ApplicationController
   end
 
   def pay_all_now
+    pay
+  end
+
+  def pay_with_split
+    pay
+  end
+
+  def pay
     Braintree::Configuration.environment = :sandbox
     Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
     Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
@@ -83,6 +89,8 @@ class ReservationsController < ApplicationController
     rescue
       customer = Braintree::Customer.create(id: current_user.braintree_id)
     end
+
+    current_user.authorize_unsent_bills
 
     @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
 
@@ -103,37 +111,18 @@ class ReservationsController < ApplicationController
 
     bill = Bill.create(user: current_user, reservation: @reservation, status: :unsent, amount: @reservation.full_amount_to_be_payed.to_f, one_time_nonce: nonce_from_the_client)
 
-    @reservation.bills.first.submit_for_settlement
+    @reservation.bills.last.submit_for_settlement
 
-    if @reservation.bills.first.status == "submitted_for_settlement"
+    if @reservation.bills.last.status == "submitted_for_settlement"
+      @reservation.bills.last.send_email_confirmation_after_submitted
+      @reservation.cleanse_unsent_or_authorized_bills_when_paying_in_full
       @reservation.kaparo_paid = true
       @reservation.save!
+      @reservation.participants.each do |user|
+        ReservationMailer.reservation_confirmed(@reservation.id, user.id).deliver_later
+      end
+      ReservationMailer.reservation_confirmed(@reservation.id, @reservation.reservation_owner.id).deliver_later
     end
-
-  end
-
-  def pay_with_split
-    Braintree::Configuration.environment = :sandbox
-    Braintree::Configuration.merchant_id = ENV["BRAINTREE_MERCHANT_ID"]
-    Braintree::Configuration.public_key = ENV["BRAINTREE_PUBLIC_KEY"]
-    Braintree::Configuration.private_key = ENV["BRAINTREE_PRIVATE_KEY"]
-
-    begin
-      customer = Braintree::Customer.find(current_user.braintree_id)
-    rescue
-      customer = Braintree::Customer.create(id: current_user.braintree_id)
-    end
-
-    @braintree_token = Braintree::ClientToken.generate(customer_id: current_user.braintree_id)
-
-    @reservation = Reservation.find(params[:id])
-    if params[:token] == @reservation.token
-      authorize @reservation
-    else
-      raise
-      #create a custom error for this
-    end
-
   end
 
   def receive_nonce_and_create_unsent_bill
@@ -167,7 +156,7 @@ class ReservationsController < ApplicationController
 
     if @reservation.participants.include?(current_user)
       ReservationMailer.recently_joined_to_owner(@reservation.id, current_user.id).deliver_later
-      ReservationMailer.confirmation(@reservation.id, current_user.id).deliver_later
+      ReservationMailer.confirmation_for_joining(@reservation.id, current_user.id).deliver_later
 
       redirect_to reservation_path(@reservation, token: @reservation.token), notice: "Successfully joined reservation."
     else
