@@ -74,6 +74,35 @@ class ReservationsController < ApplicationController
     end
   end
 
+  def invite_with_sms
+    @reservation = Reservation.find(params[:id])
+    if params[:token] == @reservation.token
+      authorize @reservation
+    else
+      raise
+      #create a custom error for this
+    end
+  end
+
+  def invite_with_twilio
+    @reservation = Reservation.find(params[:id])
+    if params[:token] == @reservation.token
+      authorize @reservation
+    else
+      raise
+      #create a custom error for this
+    end
+
+    number = params[:number]
+    status = @reservation.send_sms_invitation_to_number(number, current_user)
+
+    if status == true
+      render json: number, status: :ok
+    else
+      render json: number, status: :fail
+    end
+  end
+
   def pay_all_now
     pay
   end

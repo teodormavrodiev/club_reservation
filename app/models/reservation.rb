@@ -1,3 +1,5 @@
+require 'twilio-ruby'
+
 class Reservation < ApplicationRecord
   belongs_to :reservation_owner, class_name: "User", foreign_key: "reservation_owner_id"
   has_many :res_tables, dependent: :destroy
@@ -156,5 +158,29 @@ class Reservation < ApplicationRecord
       bill.destroy!
     end
   end
+
+  def send_sms_invitation_to_number(number, user)
+    club_name = tables.first.club.name
+    account_sid = ENV['TWILIO_API_ACCOUNT_SID']
+    auth_token = ENV['TWILIO_API_AUTH_TOKEN']
+
+    Twilio.configure do |config|
+      config.account_sid = account_sid
+      config.auth_token = auth_token
+    end
+
+    @client = Twilio::REST::Client.new
+
+    if @client.messages.create(
+      from: "+13238005977" ,
+      to: "#{number}",
+      body: "Hey! Your buddy #{user.full_name}, wants to invite you to a reservation in #{club_name}, on the
+      #{date}. Follow this link to accept his invitation and coordinate with your friends. #{Rails.application.routes.url_helpers.reservation_url(self, token: self.token, host: 'club-reservation.herokuapp.com')}.")
+      return true
+    else
+      return false
+    end
+  end
+
 
 end
