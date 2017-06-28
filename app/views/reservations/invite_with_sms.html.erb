@@ -9,12 +9,19 @@
           type: "POST",
           url: $(this).attr('action'), //sumbits it to the given url of the form
           data: phoneNumber,
-          dataType: "JSON"
-      }).success(function(json){
-          console.log("success", json);
-          submit.css("background-color", "green");
-          submit.val("success");
-      });
+          dataType: "JSON",
+          success: function(json){
+            console.log("success", json);
+            submit.css("background-color", "green");
+            submit.val("success");
+          },
+          error: function(json, err) {
+            console.log("failure", json);
+            console.log(err);
+            submit.css("background-color", "red");
+            submit.val("failure");
+          }
+          });
       return false; // prevents normal behaviour
       });
     });
