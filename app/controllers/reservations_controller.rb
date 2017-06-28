@@ -97,9 +97,9 @@ class ReservationsController < ApplicationController
     status = @reservation.send_sms_invitation_to_number(number, current_user)
 
     if status == true
-      render json: number, status: :ok
+      render json: @reservation, status: :ok
     else
-      render json: number, status: :fail
+      render json: @reservation, status: :fail
     end
   end
 
