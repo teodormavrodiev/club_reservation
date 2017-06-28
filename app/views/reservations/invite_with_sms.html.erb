@@ -1,0 +1,33 @@
+<% content_for(:after_js) do %>
+  <%= javascript_tag do %>
+    $(document).ready(function() {
+      $('form').submit(function() {
+      var phoneNumber = $(this).serialize();
+      var submit = $(this).find(":submit");
+      submit.attr("disabled", true);
+      $.ajax({
+          type: "POST",
+          url: $(this).attr('action'), //sumbits it to the given url of the form
+          data: phoneNumber,
+          dataType: "JSON"
+      }).success(function(json){
+          console.log("success", json);
+          submit.css("background-color", "green");
+          submit.val("success");
+      });
+      return false; // prevents normal behaviour
+      });
+    });
+  <% end %>
+<% end %>
+
+<%= form_tag(invite_with_twilio_reservation_path(@reservation, token: @reservation.token), method: "post") do %>
+  <%= label_tag(:number, "Send to:") %>
+  <%= text_field_tag(:number) %>
+  <%= submit_tag("send")%>
+<% end %>
+<%= form_tag(invite_with_twilio_reservation_path(@reservation, token: @reservation.token), method: "post") do %>
+  <%= label_tag(:number, "Send to:") %>
+  <%= text_field_tag(:number) %>
+  <%= submit_tag("send") %>
+<% end %>

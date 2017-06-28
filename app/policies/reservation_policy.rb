@@ -44,4 +44,13 @@ class ReservationPolicy < ApplicationPolicy
   def pay_all_split_fees?
     true
   end
+
+  def invite_with_sms?
+    true
+  end
+
+  def invite_with_twilio?
+    true
+  end
+
 end

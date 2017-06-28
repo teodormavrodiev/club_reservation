@@ -113,6 +113,9 @@ Reservation in: <%= @reservation.tables.first.club.name %>
 <% if @reservation.participants.include?(current_user) || @reservation.reservation_owner == current_user %>
   <button class="send-dialog" value="<%= reservation_url(@reservation)%>?token=<%=@reservation.token %>"> Share on facebook </button>
   <a href="<%= reservation_url(@reservation)%>?token=<%=@reservation.token %>"> The link shared on facebook</a>
+  <% if @reservation.reservation_owner == current_user %>
+    <%= link_to "Invite with sms", invite_with_sms_reservation_path(@reservation, token: @reservation.token)  %>
+  <% end %>
 <% else %>
   <%= link_to "Join reservation", join_reservation_path(@reservation)  %>
 <% end %>
