@@ -1,9 +1,19 @@
 class ClubsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:index, :show, :show_map]
+  skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    @clubs = policy_scope(Club)
-    @date = params[:date] || Date.today
+    @clubs = Club.all
+    @date = Date.today
+
+    if params.has_key?(:date) && params[:date].present?
+      @date = params[:date]
+      @clubs = Club.has_free_seats_on(params[:date], @clubs)
+    end
+
+    if params.has_key?(:location) && params[:location].present?
+      @clubs = Club.is_in(params[:location], @clubs)
+    end
 
     @hash = Gmaps4rails.build_markers(@clubs) do |club, marker|
       marker.lat club.latitude
