@@ -26,6 +26,8 @@ gem 'swipebox'
 
 gem 'geocoder'
 
+gem 'bootstrap-datepicker-rails'
+
 gem 'gmaps4rails'
 
 gem 'twilio-ruby', '~> 4.13.0'

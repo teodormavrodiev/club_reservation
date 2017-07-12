@@ -1,3 +1,27 @@
+<% content_for(:after_js) do %>
+  <%= javascript_tag do %>
+    $(document).ready(function() {
+      $('.datepicker').datepicker({
+        format: "dd/mm/yyyy",
+        orientation: "bottom auto"
+      });
+    });
+  <% end %>
+<% end %>
+
+<%= form_tag(clubs_path, method: "get") do %>
+  <input type="text" name= "date" placeholder="Date..." class="datepicker" style="float:left;">
+  <select class="form-control" name="region" style="width:180px; height: 34px; float:left;">
+    <option value="" disabled selected>Select region</option>
+    <option>Studentski Grad</option>
+    <option>Centura</option>
+    <option>Lozenets</option>
+    <option>Mladost</option>
+  </select>
+  <%= submit_tag "Filter" %>
+<% end %>
+
+
 <% @clubs.each do |club| %>
   <br>
   Name: <%= club.name %>

@@ -11,8 +11,8 @@ class ClubsController < ApplicationController
       @clubs = Club.has_free_seats_on(params[:date], @clubs)
     end
 
-    if params.has_key?(:location) && params[:location].present?
-      @clubs = Club.is_in(params[:location], @clubs)
+    if params.has_key?(:region) && params[:region].present?
+      @clubs = Club.is_in(params[:region], @clubs)
     end
 
     @hash = Gmaps4rails.build_markers(@clubs) do |club, marker|
@@ -20,6 +20,7 @@ class ClubsController < ApplicationController
       marker.lng club.longitude
       # marker.infowindow render_to_string(partial: "/clubs/map_box", locals: { club: club })
     end
+
   end
 
   def show

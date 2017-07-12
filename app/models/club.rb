@@ -26,10 +26,10 @@ class Club < ApplicationRecord
     return filtered_clubs
   }
 
-  scope :is_in, -> (location, clubs) {
+  scope :is_in, -> (region, clubs) {
     filtered_clubs = []
     clubs.each do |club|
-      if club.location == location
+      if club.region == region
         filtered_clubs << club
       end
     end
