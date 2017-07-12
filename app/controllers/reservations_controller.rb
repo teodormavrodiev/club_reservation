@@ -35,7 +35,7 @@ class ReservationsController < ApplicationController
     res.tables.each do |table|
       if table.reserved_on?(res_date)
         authorize res
-        redirect_to :back, notice: "Table is already reserved."
+        return redirect_to :back, notice: "Table is already reserved."
       end
       if table.kaparo_required
         kaparo_required = true
@@ -54,13 +54,13 @@ class ReservationsController < ApplicationController
 
     if kaparo_required
       ResolveReservationJob.set(wait: 60.minutes).perform_later(res.id)
-      redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
+      return redirect_to reservation_path(res, token: res.token), alert: "We have saved the table/s for you. Unfortunately, this club requires a Kaparo. This reservation will expire in one hour, unless you pay the kaparo. See available payment methods below."
     else
       res.participants.each do |user|
         ReservationMailer.reservation_confirmed(res.id, user.id).deliver_later
       end
       ReservationMailer.reservation_confirmed(res.id, res.reservation_owner.id).deliver_later
-      redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
+      return redirect_to reservation_path(res, token: res.token), notice: "Successfully reserved."
     end
   end
 

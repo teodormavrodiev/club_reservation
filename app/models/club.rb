@@ -16,6 +16,26 @@ class Club < ApplicationRecord
 
   after_validation :geocode, if: :location_changed?
 
+  scope :has_free_seats_on, -> (date, clubs) {
+    filtered_clubs = []
+    clubs.each do |club|
+      if club.seats_available_on(date) > 0
+        filtered_clubs << club
+      end
+    end
+    return filtered_clubs
+  }
+
+  scope :is_in, -> (region, clubs) {
+    filtered_clubs = []
+    clubs.each do |club|
+      if club.region == region
+        filtered_clubs << club
+      end
+    end
+    return filtered_clubs
+  }
+
   def average_rating
     average_rating = 0
     if votes > 0

@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(version: 20170625085520) do
     t.integer  "capacity"
     t.text     "description"
     t.string   "location"
+    t.string   "region"
     t.integer  "club_owner_id"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false

@@ -29,14 +29,16 @@ club = Club.new({
   name: "Club 33",
   capacity: 260,
   location: "street atanas manchev, 1700, Sofia, Bulgaria",
-  description: "Awesome club in the heart of party town."
+  description: "Awesome club in the heart of party town.",
+  region: "Studentski Grad"
   })
 
 club2 = Club.new({
   name: "Mascara",
   capacity: 300,
   location: "rakovska 25, Sofia, Bulgaria",
-  description: "Awesome club in the heart of the city."
+  description: "Awesome club in the heart of the city.",
+  region: "Centura"
   })
 
 club.club_owner = user1
